@@ -1,31 +1,32 @@
+
 """
 LORANNYS LUCAS OS — Render API
 ================================
 Backend mínimo para las únicas dos cosas que Supabase no puede hacer:
   1. Rule Engine Python (análisis de transcripciones en español)
   2. Generación de archivos Excel y PDF
-
+ 
 Deploy: Render.com → New Web Service → Free tier
   Build Command : pip install -r requirements.txt
   Start Command : uvicorn main:app --host 0.0.0.0 --port $PORT
-
+ 
 Variables de entorno (opcional):
   ALLOWED_ORIGINS  — dominios del frontend separados por coma
                      ej: https://mi-dominio.com,https://lorannys.vercel.app
                      Si no se define, se permite cualquier origen (modo desarrollo)
 """
-
+ 
 import io
 import os
 import unicodedata
 from datetime import date, timedelta
 from typing import Any
-
+ 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
-
+ 
 # ── Exports ────────────────────────────────────────────────────────────────────
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, PatternFill
@@ -34,9 +35,9 @@ from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import cm
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
-
+ 
 app = FastAPI(title="LORANNYS Rule Engine API", version="1.0.0")
-
+ 
 # CORS — permite peticiones desde el frontend HTML (cualquier origen por defecto)
 _origins_raw = os.environ.get("ALLOWED_ORIGINS", "*")
 _origins = [o.strip() for o in _origins_raw.split(",")]
@@ -46,12 +47,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
+ 
+ 
 # ══════════════════════════════════════════════════════════════════════════════
 # RULE ENGINE — Extrae compromisos de transcripciones en español
 # ══════════════════════════════════════════════════════════════════════════════
-
+ 
 COMMITMENT_PATTERNS = [
     (r"\bme comprometo a\b", 0.95, "compromiso explícito"),
     (r"\bqueda(n)? pendiente\b", 0.90, "pendiente explícito"),
@@ -65,9 +66,9 @@ COMMITMENT_PATTERNS = [
     (r"\ble toca a\b", 0.65, "le toca a"),
     (r"\bnos toca\b", 0.65, "nos toca"),
 ]
-
+ 
 UNCERTAINTY_PATTERNS = [r"\bsi\b", r"\btal vez\b", r"\bposiblemente\b", r"\bno creo\b", r"\bdependiendo\b"]
-
+ 
 DEADLINE_PATTERNS = [
     (r"\bpara el (lunes|martes|miércoles|jueves|viernes|sábado|domingo)\b", "weekday"),
     (r"\ben (dos|tres|cuatro|\d+) (días|semanas|meses)\b", "relative"),
@@ -76,11 +77,11 @@ DEADLINE_PATTERNS = [
     (r"\beste mes\b", "this_month"),
     (r"\bpara el (\d{1,2}) de (\w+)\b", "specific_day"),
 ]
-
+ 
 WEEKDAYS = {"lunes": 0, "martes": 1, "miércoles": 2, "jueves": 3, "viernes": 4, "sábado": 5, "domingo": 6}
 MONTHS   = {"enero":0,"febrero":1,"marzo":2,"abril":3,"mayo":4,"junio":5,"julio":6,"agosto":7,"septiembre":8,"octubre":9,"noviembre":10,"diciembre":11}
 NUM_WORDS = {"dos": 2, "tres": 3, "cuatro": 4}
-
+ 
 GAZETTEER = {
     "ibagué": "municipio", "soledad": "municipio", "sincelejo": "municipio", "neiva": "municipio",
     "tolima": "departamento", "atlántico": "departamento", "huila": "departamento", "sucre": "departamento",
@@ -92,35 +93,35 @@ GAZETTEER = {
     "acueducto": "tema", "alcantarillado": "tema", "regalías": "tema",
     "seguridad": "tema", "vías": "tema", "salud": "tema",
 }
-
-
+ 
+ 
 import re
-
-
+ 
+ 
 def _normalize(text: str) -> str:
     return "".join(c for c in unicodedata.normalize("NFKD", text.lower()) if not unicodedata.combining(c))
-
-
+ 
+ 
 def _split_sentences(text: str) -> list[str]:
     text = re.sub(r"\s+", " ", text).strip()
     if not text:
         return []
     return [s.strip() for s in re.split(r"(?<=[.!?])\s+", text) if s.strip()]
-
-
+ 
+ 
 def _guess_responsible(sentence: str) -> str | None:
     match = re.search(r"\b([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+\s[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)\b", sentence)
     return match.group(1) if match else None
-
-
+ 
+ 
 def _guess_deadline_text(lower: str) -> str | None:
     for pattern, _ in DEADLINE_PATTERNS:
         m = re.search(pattern, lower, re.IGNORECASE)
         if m:
             return m.group(0)
     return None
-
-
+ 
+ 
 def _resolve_deadline(text: str, reference_date: date) -> date | None:
     if not text:
         return None
@@ -160,19 +161,19 @@ def _resolve_deadline(text: str, reference_date: date) -> date | None:
                 d = date(d.year + 1, d.month, d.day)
             return d
     return None
-
-
+ 
+ 
 class AnalyzeRequest(BaseModel):
     text: str
     meeting_date: date | None = None
     known_contacts: list[dict] = []   # [{id, name}] — para matchear personas
-
-
+ 
+ 
 @app.get("/health")
 def health():
     return {"status": "ok", "service": "lorannys-rule-engine"}
-
-
+ 
+ 
 @app.post("/analyze")
 def analyze_transcript(payload: AnalyzeRequest):
     """
@@ -184,10 +185,10 @@ def analyze_transcript(payload: AnalyzeRequest):
     sentences = _split_sentences(payload.text)
     commitments = []
     entities = []
-
+ 
     for idx, sentence in enumerate(sentences):
         lower = sentence.lower()
-
+ 
         # Buscar patrones de compromiso
         for pattern_re, weight, label in COMMITMENT_PATTERNS:
             if re.search(pattern_re, lower, re.IGNORECASE):
@@ -198,10 +199,10 @@ def analyze_transcript(payload: AnalyzeRequest):
                 if any(re.search(u, lower, re.IGNORECASE) for u in UNCERTAINTY_PATTERNS):
                     confidence -= 0.25
                 confidence = round(max(0.05, min(0.99, confidence)), 2)
-
+ 
                 dl_text = _guess_deadline_text(lower)
                 resolved = _resolve_deadline(dl_text, reference_date) if dl_text else None
-
+ 
                 commitments.append({
                     "sentence_index": idx,
                     "text": sentence,
@@ -213,12 +214,12 @@ def analyze_transcript(payload: AnalyzeRequest):
                     "resolved_due_date": resolved.isoformat() if resolved else None,
                 })
                 break
-
+ 
         # Extraer entidades del gazetteer
         for term, entity_type in GAZETTEER.items():
             if re.search(r"\b" + re.escape(term) + r"\b", lower, re.IGNORECASE):
                 entities.append({"entity_type": entity_type, "value": term, "confidence": 0.95, "matched_contact_id": None})
-
+ 
         # Detectar personas (nombres propios)
         for m in re.finditer(r"\b([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+\s[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)\b", sentence):
             name = m.group(1)
@@ -229,13 +230,13 @@ def analyze_transcript(payload: AnalyzeRequest):
                 "confidence": 1.0 if known_id else 0.4,
                 "matched_contact_id": known_id,
             })
-
+ 
     reasons = [
         *[f"Ambiguo ({c['confidence']}): {c['text'][:50]}..." for c in commitments if c["requires_llm"]],
         *([f"Personas sin match: {', '.join({e['value'] for e in entities if e['entity_type']=='persona' and not e['matched_contact_id']})}"]
           if any(e["entity_type"] == "persona" and not e["matched_contact_id"] for e in entities) else []),
     ]
-
+ 
     return {
         "sentences_analyzed": len(sentences),
         "commitments": commitments,
@@ -243,17 +244,17 @@ def analyze_transcript(payload: AnalyzeRequest):
         "llm_escalation_needed": len(reasons) > 0,
         "llm_escalation_reasons": reasons,
     }
-
-
+ 
+ 
 # ══════════════════════════════════════════════════════════════════════════════
 # EXPORTACIÓN — recibe datos desde el frontend, devuelve el archivo
 # ══════════════════════════════════════════════════════════════════════════════
-
+ 
 BRAND_PURPLE = "7C3AED"
 PLUM = "2B0A3D"
 LIGHT_PURPLE = "F5F3FF"
-
-
+ 
+ 
 def _xl_sheet(wb, title: str, headers: list[str], rows: list[list], col_widths: list[int]):
     ws = wb.active if wb.active.title == "Sheet" else wb.create_sheet(title)
     ws.title = title
@@ -274,8 +275,8 @@ def _xl_sheet(wb, title: str, headers: list[str], rows: list[list], col_widths: 
     for col, w in enumerate(col_widths, 1):
         ws.column_dimensions[ws.cell(row=1, column=col).column_letter].width = w
     return ws
-
-
+ 
+ 
 def _pdf_style(col_widths):
     from reportlab.lib.colors import HexColor
     return TableStyle([
@@ -291,19 +292,19 @@ def _pdf_style(col_widths):
         ("GRID", (0, 0), (-1, -1), 0.3, HexColor("#E5E7EB")),
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
     ])
-
-
+ 
+ 
 class ExportRequest(BaseModel):
     data: list[dict[str, Any]]
-
-
+ 
+ 
 def _stream_xlsx(wb: Workbook, filename: str) -> StreamingResponse:
     buf = io.BytesIO()
     wb.save(buf); buf.seek(0)
     return StreamingResponse(buf, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                              headers={"Content-Disposition": f"attachment; filename={filename}"})
-
-
+ 
+ 
 def _stream_pdf(story: list, filename: str) -> StreamingResponse:
     buf = io.BytesIO()
     doc = SimpleDocTemplate(buf, pagesize=landscape(A4),
@@ -312,8 +313,8 @@ def _stream_pdf(story: list, filename: str) -> StreamingResponse:
     doc.build(story); buf.seek(0)
     return StreamingResponse(buf, media_type="application/pdf",
                              headers={"Content-Disposition": f"attachment; filename={filename}"})
-
-
+ 
+ 
 @app.post("/export/contacts.xlsx")
 def export_contacts_xlsx(req: ExportRequest):
     wb = Workbook()
@@ -324,8 +325,8 @@ def export_contacts_xlsx(req: ExportRequest):
          for c in req.data],
         [28, 30, 30, 18, 18, 30, 30, 8])
     return _stream_xlsx(wb, "contactos.xlsx")
-
-
+ 
+ 
 @app.post("/export/contacts.pdf")
 def export_contacts_pdf(req: ExportRequest):
     from reportlab.lib.colors import HexColor
@@ -350,8 +351,8 @@ def export_contacts_pdf(req: ExportRequest):
     ]
     story[-1].setStyle(_pdf_style(col_widths))
     return _stream_pdf(story, "contactos.pdf")
-
-
+ 
+ 
 @app.post("/export/commitments.xlsx")
 def export_commitments_xlsx(req: ExportRequest):
     wb = Workbook()
@@ -362,8 +363,8 @@ def export_commitments_xlsx(req: ExportRequest):
          for c in req.data],
         [60, 25, 25, 18, 15, 13])
     return _stream_xlsx(wb, "compromisos.xlsx")
-
-
+ 
+ 
 @app.post("/export/commitments.pdf")
 def export_commitments_pdf(req: ExportRequest):
     from reportlab.lib.colors import HexColor
@@ -387,8 +388,8 @@ def export_commitments_pdf(req: ExportRequest):
     ]
     story[-1].setStyle(_pdf_style(col_widths))
     return _stream_pdf(story, "compromisos.pdf")
-
-
+ 
+ 
 @app.post("/export/meetings.xlsx")
 def export_meetings_xlsx(req: ExportRequest):
     wb = Workbook()
@@ -400,3 +401,131 @@ def export_meetings_xlsx(req: ExportRequest):
          for m in req.data],
         [14, 26, 12, 12, 80])
     return _stream_xlsx(wb, "reuniones.xlsx")
+ 
+ 
+# ══════════════════════════════════════════════════════════════════════════════
+# EXPORTACIÓN AGENDA PDF
+# Genera el mismo formato de la Agenda Ejecutiva Diaria
+# ══════════════════════════════════════════════════════════════════════════════
+ 
+class AgendaExportRequest(BaseModel):
+    fecha: str
+    fecha_larga: str
+    objetivos: list[str] = []
+    eventos: list[dict[str, Any]] = []
+ 
+ 
+@app.post("/export/agenda.pdf")
+def export_agenda_pdf(req: AgendaExportRequest):
+    from reportlab.lib.colors import HexColor, white, black
+    from reportlab.platypus import HRFlowable
+    from reportlab.lib.enums import TA_CENTER
+ 
+    buf = io.BytesIO()
+    doc = SimpleDocTemplate(buf, pagesize=A4,
+                            leftMargin=2*cm, rightMargin=2*cm,
+                            topMargin=2*cm, bottomMargin=2*cm)
+ 
+    PLUM_C   = HexColor("#2B0A3D")
+    VIOLET_C = HexColor("#7C3AED")
+    GRAY_C   = HexColor("#6B7280")
+    LIGHT_C  = HexColor("#F5F3FF")
+    GOLD_C   = HexColor("#fbbf24")
+ 
+    ESTADO_LABELS = {'confirmado':'CONFIRMADO','pendiente':'PENDIENTE',
+        'por_confirmar':'POR CONFIRMAR','cancelado':'CANCELADO','realizado':'REALIZADO'}
+    ESTADO_COLORS = {'confirmado':HexColor("#065f46"),'pendiente':HexColor("#92400e"),
+        'por_confirmar':HexColor("#1d4ed8"),'cancelado':HexColor("#991b1b"),'realizado':HexColor("#5b21b6")}
+ 
+    story = []
+ 
+    def ps(name, **kw):
+        return ParagraphStyle(name, **kw)
+ 
+    # Encabezado
+    hdr_data = [
+        [Paragraph("AGENDA EJECUTIVA DIARIA", ps("h1", fontName="Helvetica-Bold", fontSize=15, textColor=white, alignment=TA_CENTER))],
+        [Paragraph("CONGRESO DE LA REPÚBLICA DE COLOMBIA", ps("h2", fontName="Helvetica", fontSize=9, textColor=HexColor("#ddd6fe"), alignment=TA_CENTER))],
+        [Paragraph("UNIDAD DE TRABAJO LEGISLATIVO – UTL", ps("h3", fontName="Helvetica", fontSize=9, textColor=HexColor("#ddd6fe"), alignment=TA_CENTER))],
+        [Paragraph("SENADORA CLAUDIA MARGARITA ZULETA", ps("h4", fontName="Helvetica-Bold", fontSize=10, textColor=HexColor("#e9d5ff"), alignment=TA_CENTER))],
+        [Paragraph(req.fecha_larga, ps("h5", fontName="Helvetica-Bold", fontSize=11, textColor=GOLD_C, alignment=TA_CENTER))],
+    ]
+    hdr_tbl = Table(hdr_data, colWidths=[17*cm])
+    hdr_tbl.setStyle(TableStyle([
+        ("BACKGROUND",(0,0),(-1,-1),PLUM_C),
+        ("TOPPADDING",(0,0),(0,0),14), ("BOTTOMPADDING",(0,-1),(-1,-1),14),
+        ("TOPPADDING",(0,1),(-1,-2),2), ("BOTTOMPADDING",(0,0),(-1,-2),2),
+        ("LEFTPADDING",(0,0),(-1,-1),14), ("RIGHTPADDING",(0,0),(-1,-1),14),
+    ]))
+    story.append(hdr_tbl)
+    story.append(Spacer(1, 0.4*cm))
+ 
+    # Objetivos
+    if req.objetivos:
+        obj_rows = [[Paragraph("OBJETIVO DEL DÍA", ps("ot", fontName="Helvetica-Bold", fontSize=10, textColor=white))]]
+        for o in req.objetivos:
+            obj_rows.append([Paragraph(f"  ● {o}", ps("oi", fontName="Helvetica", fontSize=9, textColor=white, leftIndent=8, leading=13))])
+        obj_tbl = Table(obj_rows, colWidths=[17*cm])
+        obj_tbl.setStyle(TableStyle([
+            ("BACKGROUND",(0,0),(-1,-1),VIOLET_C),
+            ("TOPPADDING",(0,0),(0,0),10), ("BOTTOMPADDING",(0,-1),(-1,-1),10),
+            ("TOPPADDING",(0,1),(-1,-1),3), ("BOTTOMPADDING",(0,0),(-1,-2),3),
+            ("LEFTPADDING",(0,0),(-1,-1),14), ("RIGHTPADDING",(0,0),(-1,-1),14),
+        ]))
+        story.append(obj_tbl)
+        story.append(Spacer(1, 0.5*cm))
+ 
+    # Título línea de tiempo
+    story.append(Paragraph("LÍNEA DE TIEMPO", ps("lt", fontName="Helvetica-Bold", fontSize=11, textColor=PLUM_C, spaceAfter=6)))
+    story.append(HRFlowable(width="100%", thickness=2, color=PLUM_C, spaceAfter=6))
+ 
+    if req.eventos:
+        th = ps("th", fontName="Helvetica-Bold", fontSize=8, textColor=white, alignment=TA_CENTER)
+        thl = ps("thl", fontName="Helvetica-Bold", fontSize=8, textColor=white)
+        cs = ps("cs", fontName="Helvetica", fontSize=8, leading=11)
+        cb = ps("cb", fontName="Helvetica-Bold", fontSize=9, leading=12)
+        ch = ps("ch", fontName="Helvetica-Bold", fontSize=10, textColor=VIOLET_C, leading=13, alignment=TA_CENTER)
+ 
+        rows = [[Paragraph("HORA",th), Paragraph("COMPROMISO",thl), Paragraph("LUGAR",thl),
+                 Paragraph("RESPONSABLE",thl), Paragraph("ESTADO",th)]]
+        for ev in req.eventos:
+            hora = ev.get('hora','')
+            if ev.get('hora_fin'): hora += f"\n{ev['hora_fin']}"
+            est = ev.get('estado','confirmado')
+            rows.append([
+                Paragraph(hora, ch),
+                Paragraph(ev.get('compromiso',''), cb),
+                Paragraph(ev.get('lugar') or '—', cs),
+                Paragraph(ev.get('responsables') or '—', cs),
+                Paragraph(ESTADO_LABELS.get(est, est.upper()),
+                          ps("es", fontName="Helvetica-Bold", fontSize=7,
+                             textColor=ESTADO_COLORS.get(est, black), alignment=TA_CENTER)),
+            ])
+        tbl = Table(rows, colWidths=[2.2*cm, 5.5*cm, 4*cm, 3.5*cm, 2.3*cm], repeatRows=1)
+        tbl.setStyle(TableStyle([
+            ("BACKGROUND",(0,0),(-1,0),PLUM_C),
+            ("TOPPADDING",(0,0),(-1,0),8), ("BOTTOMPADDING",(0,0),(-1,0),8),
+            ("TOPPADDING",(0,1),(-1,-1),7), ("BOTTOMPADDING",(0,1),(-1,-1),7),
+            ("LEFTPADDING",(0,0),(-1,-1),7), ("RIGHTPADDING",(0,0),(-1,-1),7),
+            ("ROWBACKGROUNDS",(0,1),(-1,-1),[white, LIGHT_C]),
+            ("GRID",(0,0),(-1,-1),0.3,HexColor("#E5E7EB")),
+            ("VALIGN",(0,0),(-1,-1),"MIDDLE"),
+            ("ALIGN",(0,0),(0,-1),"CENTER"), ("ALIGN",(4,0),(4,-1),"CENTER"),
+        ]))
+        story.append(tbl)
+    else:
+        story.append(Paragraph("Sin eventos programados.", ps("emp", fontName="Helvetica-Oblique", fontSize=10, textColor=GRAY_C)))
+ 
+    story.append(Spacer(1, 0.6*cm))
+    story.append(HRFlowable(width="100%", thickness=0.5, color=GRAY_C))
+    story.append(Spacer(1, 0.2*cm))
+    story.append(Paragraph(
+        f"Generado: {date.today().strftime('%d/%m/%Y')}  |  LORANNYS LUCAS OS — Sistema de Inteligencia Política",
+        ps("foot", fontName="Helvetica", fontSize=7, textColor=GRAY_C, alignment=TA_CENTER)
+    ))
+ 
+    doc.build(story)
+    buf.seek(0)
+    return StreamingResponse(buf, media_type="application/pdf",
+                             headers={"Content-Disposition": f"attachment; filename=agenda-{req.fecha}.pdf"})
+ 
