@@ -1,0 +1,2363 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LORANNYS LUCAS OS</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+/* ── Config ── Cambia estos valores con los tuyos de Supabase y Render */
+/*
+  SUPABASE_URL  = https://glvqhcawldbhwvyihymy.supabase.co
+  SUPABASE_KEY  = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdsdnFoY2F3bGRiaHd2eWloeW15Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyNTMwMDIsImV4cCI6MjA5ODgyOTAwMn0.fJ6Ez-sst-oAkEUdmR8TqqVBg-UhD8uVFcgkwYghKyA
+  RENDER_URL    = https://lorannys-rules-engine.onrender.com
+*/
+
+:root{
+  --brand-gradient: linear-gradient(135deg,#2B0A3D,#7C3AED,#EC4899);
+  --intelligence-violet:#7C3AED;
+  --rose:#EC4899;
+  --plum:#2B0A3D;
+  --gray-50:#f9fafb;--gray-100:#f3f4f6;--gray-200:#e5e7eb;
+  --gray-400:#9ca3af;--gray-500:#6b7280;--gray-600:#4b5563;
+  --gray-700:#374151;--gray-800:#1f2937;--gray-900:#111827;
+  --amber-bg:#fffbeb;--amber-border:#fde68a;
+  --green:#10b981;--red:#ef4444;
+  --sidebar-w:220px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:var(--gray-800);background:var(--gray-50);height:100vh;overflow:hidden;}
+#app{display:flex;height:100vh;}
+
+/* Sidebar */
+.sidebar{width:var(--sidebar-w);background:var(--plum);display:flex;flex-direction:column;flex-shrink:0;padding:0;}
+.brand{padding:20px 16px 12px;border-bottom:1px solid rgba(255,255,255,.1);}
+.brand-name{font-size:15px;font-weight:700;letter-spacing:.5px;background:var(--brand-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.brand-sub{font-size:10px;color:rgba(255,255,255,.4);margin-top:2px;}
+.nav{flex:1;padding:8px;overflow-y:auto;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;color:rgba(255,255,255,.6);font-size:13px;transition:all .15s;border:none;background:none;width:100%;text-align:left;font-family:inherit;}
+.nav-item:hover{background:rgba(255,255,255,.08);color:#fff;}
+.nav-item.active{background:rgba(124,58,237,.4);color:#fff;}
+.sidebar-footer{padding:12px 8px;border-top:1px solid rgba(255,255,255,.08);}
+
+/* Main */
+main{flex:1;overflow-y:auto;padding:28px;}
+.page-title{font-size:22px;font-weight:700;color:var(--gray-900);letter-spacing:-.5px;margin-bottom:4px;}
+.page-subtitle{font-size:13px;color:var(--gray-500);margin-bottom:20px;}
+
+/* Cards */
+.card{background:#fff;border-radius:16px;border:1px solid var(--gray-100);overflow:hidden;}
+.card.p-5{padding:20px;}
+.card-clickable{cursor:pointer;transition:box-shadow .15s,transform .1s;}
+.card-clickable:hover{box-shadow:0 4px 20px rgba(124,58,237,.12);transform:translateY(-1px);}
+.card.divide>*+*{border-top:1px solid var(--gray-50);}
+
+/* Grid */
+.grid{display:grid;gap:16px;}
+.grid-2{grid-template-columns:repeat(2,1fr);}
+.grid-3{grid-template-columns:repeat(3,1fr);}
+.col-2{grid-column:span 2;}
+@media(max-width:768px){
+  .grid-2,.grid-3,.edit-grid{grid-template-columns:1fr!important;}
+  .col-2{grid-column:span 1!important;}
+  .sidebar{width:100%!important;flex-direction:row!important;height:auto!important;padding:8px!important;}
+  .nav{display:flex;flex-direction:row;overflow-x:auto;padding:0;}
+  .nav-item{padding:8px!important;font-size:11px!important;white-space:nowrap;}
+  .brand-sub,.sidebar-footer{display:none!important;}
+  #app{flex-direction:column!important;height:auto!important;}
+  main{padding:16px!important;}
+}
+
+/* Utilities */
+.flex{display:flex;}.items-center{align-items:center;}.items-start{align-items:flex-start;}
+.justify-between{justify-content:space-between;}.gap-2{gap:8px;}.gap-3{gap:12px;}.gap-4{gap:16px;}
+.flex-1{flex:1;}.min-w-0{min-width:0;}.w-full{width:100%;}
+.text-sm{font-size:13px;}.text-xs{font-size:11px;}.text-gray-400{color:var(--gray-400);}
+.text-gray-500{color:var(--gray-500);}.text-gray-700{color:var(--gray-700);}.text-gray-800{color:var(--gray-800);}
+.text-gray-900{color:var(--gray-900);}.font-semibold{font-weight:600;}.font-medium{font-weight:500;}
+.text-violet{color:var(--intelligence-violet);}.mt-1{margin-top:4px;}.mt-3{margin-top:12px;}.mb-3{margin-bottom:12px;}.mb-4{margin-bottom:16px;}.p-4{padding:16px;}.p-5{padding:20px;}
+.text-center{text-align:center;}
+
+/* Buttons */
+.btn-primary{display:inline-flex;align-items:center;gap:6px;padding:10px 18px;background:var(--brand-gradient);color:#fff;border:none;border-radius:12px;cursor:pointer;font-weight:600;font-size:13px;font-family:inherit;transition:opacity .15s;}
+.btn-primary:hover{opacity:.9;}
+.btn-secondary{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:#fff;color:var(--gray-700);border:1px solid var(--gray-200);border-radius:10px;cursor:pointer;font-size:13px;font-family:inherit;transition:background .15s;}
+.btn-secondary:hover{background:var(--gray-50);}
+.icon-btn{background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;color:var(--gray-400);display:inline-flex;align-items:center;transition:color .15s;}
+.icon-btn:hover{color:var(--gray-700);}
+.link-btn{background:none;border:none;cursor:pointer;color:var(--intelligence-violet);font-size:13px;font-family:inherit;font-weight:500;padding:0;display:inline-flex;align-items:center;gap:4px;}
+.export-btn{font-size:12px;padding:7px 12px;border-radius:10px;border:1px solid var(--gray-200);background:#fff;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px;color:var(--gray-700);}
+.export-btn:hover{background:var(--gray-50);}
+
+/* Forms */
+.input-sm{width:100%;padding:8px 12px;border:1px solid var(--gray-200);border-radius:10px;font-size:13px;font-family:inherit;background:#fff;outline:none;transition:border-color .15s;}
+.input-sm:focus{border-color:var(--intelligence-violet);}
+.edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.edit-grid label{display:block;font-size:11px;font-weight:600;color:var(--gray-500);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;}
+.edit-actions{display:flex;gap:8px;margin-top:16px;}
+.search-input{width:100%;padding:10px 14px;border:1px solid var(--gray-200);border-radius:12px;font-size:13px;font-family:inherit;background:#fff;outline:none;}
+.search-input:focus{border-color:var(--intelligence-violet);}
+textarea.transcript-input{width:100%;padding:12px;border:1px solid var(--gray-200);border-radius:12px;font-size:13px;font-family:inherit;resize:vertical;outline:none;}
+
+/* Login */
+.login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--brand-gradient);}
+.login-box{background:rgba(255,255,255,.08);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:36px;width:340px;}
+.login-box h2{color:#fff;font-size:20px;font-weight:700;margin-bottom:4px;}
+.login-box p{color:rgba(255,255,255,.6);font-size:13px;margin-bottom:20px;}
+.login-field{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;}
+.login-field label{font-size:11px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.5px;}
+.login-field input{padding:10px 14px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:10px;color:#fff;font-size:13px;font-family:inherit;outline:none;}
+.login-field input::placeholder{color:rgba(255,255,255,.4);}
+.login-error{color:#fca5a5;font-size:12px;margin-bottom:8px;min-height:18px;}
+
+/* Avatar */
+.avatar{background:var(--brand-gradient);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;border-radius:12px;flex-shrink:0;}
+
+/* Chip */
+.chip{display:inline-flex;align-items:center;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:500;background:var(--gray-100);color:var(--gray-600);border:1px solid var(--gray-200);}
+
+/* Back btn */
+.back-btn{display:inline-flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;color:var(--gray-500);font-size:13px;font-family:inherit;margin-bottom:16px;padding:0;}
+.back-btn:hover{color:var(--gray-800);}
+
+/* Alert banners */
+.alert-critical{background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:14px;display:flex;align-items:flex-start;gap:10px;}
+.alert-medium{background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:14px;display:flex;align-items:flex-start;gap:10px;}
+
+/* Status chips */
+.status-chip{font-size:11px;padding:3px 8px;border-radius:999px;font-weight:500;display:inline-flex;align-items:center;border:1px solid;}
+.status-pendiente{background:#f0fdf4;color:#15803d;border-color:#bbf7d0;}
+.status-en_proceso{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe;}
+.status-bloqueado{background:#fff7ed;color:#c2410c;border-color:#fed7aa;}
+.status-escalado{background:#fdf4ff;color:#9333ea;border-color:#e9d5ff;}
+.status-completado{background:#f0fdf4;color:#15803d;border-color:#bbf7d0;}
+
+/* Risk */
+.risk-alto{color:#be123c;font-weight:600;}
+.risk-medio{color:#b45309;font-weight:600;}
+.risk-bajo{color:#059669;}
+
+/* Notes box */
+.notes-box{background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:12px;padding:12px;font-size:13px;color:var(--gray-800);line-height:1.5;white-space:pre-wrap;}
+
+/* Relationships */
+.rel-tag{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:500;}
+.rel-reporta_a{background:#fce7f3;color:#9d174d;} .rel-aliado{background:#ecfdf5;color:#065f46;}
+.rel-rival{background:#fee2e2;color:#991b1b;} .rel-companero{background:#eff6ff;color:#1e40af;}
+.rel-miembro_de{background:#f5f3ff;color:#5b21b6;} .rel-otro{background:var(--gray-100);color:var(--gray-700);}
+
+/* Stats bars */
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.bar-label{font-size:12px;color:var(--gray-600);width:130px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.bar-track{flex:1;height:8px;background:var(--gray-100);border-radius:999px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:999px;background:var(--brand-gradient);}
+.bar-val{font-size:12px;color:var(--gray-500);width:28px;text-align:right;font-weight:600;}
+.stat-big{font-size:32px;font-weight:800;letter-spacing:-1px;background:var(--brand-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+
+/* Calendar */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-top:8px;}
+.cal-header-row{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:2px;}
+.cal-day-name{text-align:center;font-size:11px;font-weight:600;color:var(--gray-500);padding:4px;}
+.cal-day{min-height:68px;padding:4px;border-radius:8px;background:#fff;border:1px solid var(--gray-100);}
+.cal-day.today{border-color:var(--intelligence-violet);background:#f5f3ff;}
+.cal-day.other-month{opacity:.4;}
+.cal-day-num{font-weight:600;font-size:12px;color:var(--gray-500);margin-bottom:2px;}
+.cal-event{border-radius:4px;padding:2px 4px;margin-bottom:2px;font-size:10px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;}
+.cal-event.alto{background:#be123c;}.cal-event.medio{background:#b45309;}.cal-event.bajo{background:var(--intelligence-violet);}
+
+/* Pagination */
+.pager{display:flex;align-items:center;justify-content:space-between;margin-top:16px;padding-top:12px;border-top:1px solid var(--gray-100);}
+.pager-info{font-size:12px;color:var(--gray-400);}
+
+/* Toast */
+#toast{position:fixed;bottom:24px;right:24px;padding:12px 18px;border-radius:12px;background:#1f2937;color:#fff;font-size:13px;box-shadow:0 4px 24px rgba(0,0,0,.2);display:none;z-index:9999;max-width:320px;}
+#toast.error{background:#be123c;}
+
+/* Score bar */
+.score-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.score-bar-label{font-size:12px;color:var(--gray-500);width:100px;}
+.score-bar-track{flex:1;height:6px;background:var(--gray-100);border-radius:999px;overflow:hidden;}
+.score-bar-fill{height:100%;border-radius:999px;background:var(--brand-gradient);}
+
+/* Meeting results */
+.commitment-card{background:var(--gray-50);border:1px solid var(--gray-100);border-radius:12px;padding:12px;margin-bottom:8px;}
+.commitment-card.llm{border-color:#fde68a;background:#fffbeb;}
+.confidence-badge{font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;}
+.confidence-high{background:#dcfce7;color:#166534;}
+.confidence-mid{background:#fef3c7;color:#92400e;}
+.confidence-low{background:#fee2e2;color:#991b1b;}
+
+  /* ── AGENDA ── */
+  .agenda-header{background:var(--brand-gradient);border-radius:16px;padding:24px;color:#fff;margin-bottom:20px;}
+  .agenda-fecha-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+  .agenda-fecha-nav h2{font-size:20px;font-weight:700;text-transform:capitalize;margin:0;}
+  .agenda-nav-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:6px 14px;border-radius:8px;cursor:pointer;font-family:inherit;font-size:13px;}
+  .agenda-obj{background:rgba(255,255,255,.1);border-radius:10px;padding:12px 16px;margin-top:12px;}
+  .agenda-obj-item{display:flex;align-items:flex-start;gap:8px;padding:4px 0;font-size:13px;opacity:.9;}
+  .agenda-obj-item::before{content:'●';font-size:8px;margin-top:4px;flex-shrink:0;}
+  .timeline-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .timeline-table th{background:var(--plum);color:#fff;padding:10px 12px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+  .timeline-table td{padding:12px;border-bottom:1px solid var(--gray-100);vertical-align:top;}
+  .timeline-table tr:hover td{background:#f5f3ff;}
+  .timeline-hora{font-weight:700;color:var(--intelligence-violet);white-space:nowrap;font-size:14px;}
+  .timeline-compromiso{font-weight:600;color:var(--gray-900);}
+  .timeline-lugar{font-size:12px;color:var(--gray-500);margin-top:2px;}
+  .estado-confirmado{background:#ecfdf5;color:#065f46;border:1px solid #86efac;}
+  .estado-pendiente{background:#fffbeb;color:#92400e;border:1px solid #fde68a;}
+  .estado-por_confirmar{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;}
+  .estado-cancelado{background:#fee2e2;color:#991b1b;border:1px solid #fecaca;}
+  .estado-realizado{background:#f5f3ff;color:#5b21b6;border:1px solid #ddd6fe;}
+  .estado-chip-ag{font-size:11px;padding:3px 8px;border-radius:999px;font-weight:600;display:inline-block;}
+  .mes-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px;}
+  .mes-dia{min-height:56px;padding:6px;border-radius:10px;background:#fff;border:1px solid var(--gray-100);cursor:pointer;transition:all .15s;}
+  .mes-dia:hover{border-color:var(--intelligence-violet);background:#f5f3ff;}
+  .mes-dia.hoy{border-color:var(--intelligence-violet);background:#f5f3ff;}
+  .mes-dia.con-eventos{border-color:#ddd6fe;}
+  .mes-dia-num{font-size:12px;font-weight:600;color:var(--gray-600);}
+  .mes-dia-dot{width:6px;height:6px;border-radius:50%;background:var(--intelligence-violet);margin-top:4px;}
+  .mes-dia-count{font-size:10px;color:var(--intelligence-violet);font-weight:600;}
+
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════════════════
+// CONFIGURACIÓN — edita estos 3 valores
+// ══════════════════════════════════════════════════════════════════════════════
+const SUPABASE_URL  = "https://glvqhcawldbhwvyihymy.supabase.co";     
+const SUPABASE_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdsdnFoY2F3bGRiaHd2eWloeW15Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyNTMwMDIsImV4cCI6MjA5ODgyOTAwMn0.fJ6Ez-sst-oAkEUdmR8TqqVBg-UhD8uVFcgkwYghKyA"; 
+const RENDER_URL    = "https://lorannys-rules-engine.onrender.com";     
+// ── Inicializar Supabase ──────────────────────────────────────────────────────
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ══════════════════════════════════════════════════════════════════════════════
+// UTILIDADES
+// ══════════════════════════════════════════════════════════════════════════════
+function escHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function toast(msg, err=false){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.className=err?'error':''; el.style.display='block';
+  setTimeout(()=>el.style.display='none', 3000);
+}
+function norm(s){ return String(s||'').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,''); }
+function initials(name){ return (name||'').split(' ').map(p=>p[0]).slice(0,2).join('').toUpperCase(); }
+function relDays(dateStr){
+  if(!dateStr) return 'nunca';
+  const diff=Math.floor((Date.now()-new Date(dateStr+'T00:00:00'))/86400000);
+  if(diff===0) return 'hoy'; if(diff===1) return 'ayer';
+  if(diff<7) return `hace ${diff} días`; if(diff<30) return `hace ${Math.floor(diff/7)} sem.`;
+  if(diff<365) return `hace ${Math.floor(diff/30)} mes.`; return `hace ${Math.floor(diff/365)} año(s)`;
+}
+function formatDate(d){ if(!d) return '—'; return new Date(d+'T00:00:00').toLocaleDateString('es-CO',{day:'2-digit',month:'short',year:'numeric'}); }
+function icon(name,size=16,color='currentColor'){
+  const paths={
+    dashboard:'<rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect>',
+    users:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path>',
+    building:'<rect x="2" y="7" width="20" height="14" rx="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>',
+    mic:'<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line>',
+    fileText:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line>',
+    checklist:'<path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>',
+    calendar:'<rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>',
+    barChart:'<line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line>',
+    pin:'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle>',
+    plus:'<line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>',
+    edit:'<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>',
+    x:'<line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>',
+    arrowLeft:'<line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline>',
+    checkCircle:'<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>',
+    circle:'<circle cx="12" cy="12" r="10"></circle>',
+    download:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line>',
+    wand:'<path d="m15 4-1 1"></path><path d="m9 4 1 1"></path><path d="m4 9 1 1"></path><path d="m4 15 1-1"></path><path d="M8.5 8.5 3 14l3 3 5.5-5.5"></path><path d="m20.5 3.5-15 15"></path><path d="m17 7 3-3"></path><path d="m14 10 3-3"></path>',
+    user:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle>',
+    link:'<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>',
+    history:'<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l4 2"></path>',
+    mail:'<rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>',
+  };
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">${paths[name]||''}</svg>`;
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// ESTADO GLOBAL
+// ══════════════════════════════════════════════════════════════════════════════
+const S = {
+  view:'dashboard', user:null,
+  contacts:[], contactsTotal:0, contactsPage:1, contactsQ:'', contactsDept:'', contactsMun:'', contactsCat:'',
+  companies:[], companiesTotal:0, companiesPage:1, companiesQ:'',
+  commitments:[], commitmentsTotal:0, commitmentsPage:1, commitmentsQ:'', commitmentsStatus:'',
+  meetings:[], meetingsPage:1,
+  contactFilters:{depts:[],muns:[],cats:[]},
+  selectedContact:null, selectedCompany:null, selectedMeeting:null,
+  editingContactId:null, editingCompanyId:null, editingCommitmentId:null,
+  showAddContact:false, showAddCompany:false, showAddCommitment:false, showAddEmployee:false,
+  showAddRelationship:false,
+  meeting:{text:'',contactId:null,date:'',result:null,created:false},
+  calYear:new Date().getFullYear(), calMonth:new Date().getMonth(), calEvents:[],
+  userRole: 'owner',  // 'owner' | 'agenda_viewer'
+  agendaFecha: new Date().toISOString().slice(0,10),
+  agendaEventos: [], agendaObjetivos: [],
+  agendaMes: {year:new Date().getFullYear(), month:new Date().getMonth(), dias:{}},
+  showAddEvento: false, showAddObjetivo: false, editingEventoId: null,
+  statsData:null,
+  auditLog:[], auditEntity:null, prevView:'dashboard',
+  usersList:[], showAddUser:false,
+};
+
+// ══════════════════════════════════════════════════════════════════════════════
+// SCORING (calculado en el frontend con datos de Supabase)
+// ══════════════════════════════════════════════════════════════════════════════
+function calcScore(contact, allCommitments){
+  const mine = allCommitments.filter(c=>c.contact_id===contact.id);
+  const total = mine.length, done = mine.filter(c=>c.status==='completado').length;
+  const daysSince = contact.last_interaction_at
+    ? Math.floor((Date.now()-new Date(contact.last_interaction_at+'T00:00:00'))/86400000) : 180;
+  const recencia = Math.max(0,1-daysSince/180);
+  const frecuencia = Math.min(1,(contact.interactions_12m||0)/12);
+  const influencia = contact.influence||0.5;
+  const cumplimiento = total>0 ? done/total : 0.5;
+  const total_score = .3*recencia+.25*frecuencia+.25*influencia+.2*cumplimiento;
+  return { score:Math.round(total_score*100)/100, breakdown:{recencia,frecuencia,influencia,cumplimiento} };
+}
+
+function calcRisk(c){
+  if(c.status==='completado') return {level:'bajo',overdue:false};
+  if(c.due_date){
+    const diff=Math.floor((new Date(c.due_date+'T00:00:00')-Date.now())/86400000);
+    if(diff<0) return {level:'alto',overdue:true};
+    if(diff<=3) return {level:'medio',overdue:false};
+  }
+  const days=Math.floor((Date.now()-new Date(c.created_at))/86400000);
+  if(days>30) return {level:'alto',overdue:false};
+  if(days>15) return {level:'medio',overdue:false};
+  return {level:'bajo',overdue:false};
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// CAPA DE DATOS — Supabase
+// ══════════════════════════════════════════════════════════════════════════════
+async function loadContacts(){
+  const from=(S.contactsPage-1)*24, to=from+23;
+  let q=sb.from('contacts')
+    .select('*,company:companies(id,name)',{count:'exact'})
+    .order('name')
+    .range(from,to);
+  if(S.contactsQ){ const n=norm(S.contactsQ); q=q.ilike('search_text',`%${n}%`); }
+  if(S.contactsDept) q=q.ilike('departamento',`%${norm(S.contactsDept)}%`);
+  if(S.contactsMun)  q=q.ilike('municipio',`%${norm(S.contactsMun)}%`);
+  if(S.contactsCat)  q=q.ilike('categorias',`%${S.contactsCat}%`);
+  const {data,count,error}=await q;
+  if(error){toast(error.message,true);return;}
+  S.contacts=data||[]; S.contactsTotal=count||0;
+}
+async function loadContactFilters(){
+  const {data}=await sb.from('contacts').select('departamento,municipio,categorias').eq('user_id',S.user.id);
+  const depts=new Set(), muns=new Set(), cats=new Set();
+  (data||[]).forEach(c=>{
+    if(c.departamento) depts.add(c.departamento);
+    if(c.municipio) muns.add(c.municipio);
+    if(c.categorias) c.categorias.split(',').forEach(x=>{ if(x.trim()) cats.add(x.trim()); });
+  });
+  S.contactFilters={depts:[...depts].sort(),muns:[...muns].sort(),cats:[...cats].sort()};
+}
+async function loadCompanies(){
+  const from=(S.companiesPage-1)*24, to=from+23;
+  let q=sb.from('companies').select('*,contacts!contacts_company_id_fkey(count),employees:company_employees(count)',{count:'exact'}).order('name').range(from,to);
+  if(S.companiesQ) q=q.ilike('name',`%${S.companiesQ}%`);
+  const {data,count,error}=await q;
+  if(error){toast(error.message,true);return;}
+  S.companies=data||[]; S.companiesTotal=count||0;
+}
+async function loadCommitments(){
+  const from=(S.commitmentsPage-1)*50, to=from+49;
+  let q=sb.from('commitments').select('*,contact:contacts(id,name)',{count:'exact'}).order('created_at',{ascending:false}).range(from,to);
+  if(S.commitmentsQ) q=q.or(`text.ilike.%${S.commitmentsQ}%,responsible.ilike.%${S.commitmentsQ}%`);
+  if(S.commitmentsStatus) q=q.eq('status',S.commitmentsStatus);
+  const {data,count,error}=await q;
+  if(error){toast(error.message,true);return;}
+  S.commitments=data||[]; S.commitmentsTotal=count||0;
+}
+async function loadMeetings(){
+  const {data}=await sb.from('meetings').select('*,contact:contacts(id,name),commitments_count:commitments(count)').order('created_at',{ascending:false}).limit(50);
+  S.meetings=data||[];
+}
+async function loadCalendar(year,month){
+  const start=new Date(year,month,1).toISOString().slice(0,10);
+  const end=new Date(year,month+1,0).toISOString().slice(0,10);
+  const {data}=await sb.from('commitments').select('*,contact:contacts(name)').neq('status','completado').gte('due_date',start).lte('due_date',end);
+  S.calEvents=data||[];
+}
+async function loadStats(){
+  const {data:commitments}=await sb.from('commitments').select('*');
+  const {count:totalContacts}=await sb.from('contacts').select('*',{count:'exact',head:true});
+  const {count:totalCompanies}=await sb.from('companies').select('*',{count:'exact',head:true});
+  const {count:totalMeetings}=await sb.from('meetings').select('*',{count:'exact',head:true});
+  const all=commitments||[];
+  const total=all.length;
+  const byStatus={pendiente:0,en_proceso:0,bloqueado:0,escalado:0,completado:0};
+  const byMonth={};
+  const byContact={};
+  all.forEach(c=>{
+    byStatus[c.status]=(byStatus[c.status]||0)+1;
+    const m=c.created_at?.slice(0,7)||''; if(m) byMonth[m]=(byMonth[m]||0)+1;
+  });
+  const rate=total>0?Math.round(byStatus.completado/total*100):0;
+  S.statsData={total,byStatus,rate,totalContacts,totalCompanies,totalMeetings,
+    byMonth:Object.entries(byMonth).sort().slice(-12).map(([k,v])=>({month:k,count:v}))};
+}
+async function loadAuditLog(entityType,entityId){
+  let q=sb.from('audit_log').select('*').order('created_at',{ascending:false}).limit(50);
+  if(entityType) q=q.eq('entity_type',entityType);
+  if(entityId) q=q.eq('entity_id',entityId);
+  const {data}=await q;
+  S.auditLog=data||[];
+}
+async function loadUsers(){
+  const {data}=await sb.from('profiles').select('*');
+  S.usersList=data||[];
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// HELPERS RENDER
+// ══════════════════════════════════════════════════════════════════════════════
+function statusChip(status){
+  const labels={pendiente:'Pendiente',en_proceso:'En proceso',bloqueado:'Bloqueado',escalado:'Escalado',completado:'Completado'};
+  return `<span class="status-chip status-${status}">${labels[status]||status}</span>`;
+}
+function formatLocation(c){
+  return [c.vereda?'Vereda '+c.vereda:null,c.corregimiento?'Corr. '+c.corregimiento:null,c.municipio,c.departamento].filter(Boolean).join(', ');
+}
+function categoriasChips(c){
+  if(!c.categorias) return '';
+  return c.categorias.split(',').map(x=>x.trim()).filter(Boolean).map(x=>`<span class="chip" style="font-size:11px;padding:3px 8px;">${escHtml(x)}</span>`).join(' ');
+}
+function renderPager(total,page,pageSize,prevAction,nextAction){
+  if(total<=pageSize) return '';
+  const totalPages=Math.ceil(total/pageSize);
+  const from=Math.min((page-1)*pageSize+1,total), to=Math.min(page*pageSize,total);
+  return `<div class="pager">
+    <span class="pager-info">Mostrando ${from}–${to} de ${total}</span>
+    <div class="flex items-center gap-2">
+      <button class="btn-secondary" style="font-size:12px;padding:6px 12px;" data-action="${prevAction}" ${page<=1?'disabled':''}>← Anterior</button>
+      <span style="font-size:12px;color:var(--gray-500);">Página ${page} / ${totalPages}</span>
+      <button class="btn-secondary" style="font-size:12px;padding:6px 12px;" data-action="${nextAction}" ${page>=totalPages?'disabled':''}>Siguiente →</button>
+    </div>
+  </div>`;
+}
+function commitmentRow(c, allCommitments, showContact=true){
+  const risk=calcRisk(c);
+  const done=c.status==='completado';
+  return `<div class="flex items-start gap-3 p-4" style="border-top:1px solid var(--gray-50);">
+    <button data-action="toggle-commitment" data-id="${c.id}" data-status="${c.status}" class="icon-btn" style="margin-top:2px;">
+      ${done?icon('checkCircle',18,'#10b981'):icon('circle',18,'#d1d5db')}
+    </button>
+    <div class="flex-1 min-w-0">
+      <p class="text-sm text-gray-800" style="margin:0;line-height:1.4;">${escHtml(c.text)}</p>
+      <div class="flex items-center gap-2 text-xs text-gray-400" style="margin-top:4px;flex-wrap:wrap;">
+        ${statusChip(c.status)}
+        ${c.responsible?`<span>· ${escHtml(c.responsible)}</span>`:''}
+        ${c.due_date?`<span class="risk-${risk.level}">· ${formatDate(c.due_date)}${risk.overdue?' ⚠️ VENCIDO':''}</span>`:''}
+        ${showContact&&c.contact?`<span>· ${escHtml(c.contact.name)}</span>`:''}
+      </div>
+    </div>
+    <button data-action="edit-commitment" data-id="${c.id}" class="icon-btn">${icon('edit',14)}</button>
+  </div>`;
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// VISTAS
+// ══════════════════════════════════════════════════════════════════════════════
+function renderDashboard(){
+  const pending=(S.commitments||[]).filter(c=>c.status!=='completado');
+  const alerts=pending.filter(c=>{ const r=calcRisk(c); return r.overdue||r.level==='medio'; });
+  const byRisk=[...pending].sort((a,b)=>({alto:0,medio:1,bajo:2}[calcRisk(a).level])-({alto:0,medio:1,bajo:2}[calcRisk(b).level]));
+  const hour=new Date().getHours();
+  const greeting=hour<12?'Buenos días':hour<19?'Buenas tardes':'Buenas noches';
+  return `
+    <h1 class="page-title">${greeting}</h1>
+    <p class="page-subtitle">Resumen del despacho · ${new Date().toLocaleDateString('es-CO',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</p>
+    ${alerts.length>0?`
+    <div class="alert-critical mb-4">
+      ${icon('checkCircle',18,'#be123c')}
+      <div><p class="font-semibold text-sm" style="color:#be123c;margin:0;">${alerts.length} compromiso(s) requieren atención urgente</p>
+      <p class="text-xs" style="color:#be123c;opacity:.8;margin:2px 0 0 0;">${alerts.map(a=>a.text.slice(0,60)).slice(0,3).join(' · ')}</p></div>
+    </div>`:''}
+    <div class="grid grid-3" style="margin-bottom:16px;">
+      <div class="card p-5 text-center"><p class="stat-big">${S.contactsTotal}</p><p class="text-xs text-gray-500 mt-1">Contactos</p></div>
+      <div class="card p-5 text-center"><p class="stat-big">${pending.length}</p><p class="text-xs text-gray-500 mt-1">Compromisos pendientes</p></div>
+      <div class="card p-5 text-center"><p class="stat-big">${alerts.length}</p><p class="text-xs text-gray-500 mt-1">Alertas activas</p></div>
+    </div>
+    <div class="grid grid-2">
+      <div class="card p-5">
+        <h3 class="font-semibold text-sm" style="margin:0 0 12px 0;">${icon('checklist',15,'#7c3aed')} Compromisos en riesgo</h3>
+        ${byRisk.slice(0,5).map(c=>commitmentRow(c,[],true)).join('')}
+        ${byRisk.length===0?'<p class="text-sm text-gray-400">Sin compromisos activos.</p>':''}
+      </div>
+      <div class="card p-5">
+        <h3 class="font-semibold text-sm" style="margin:0 0 12px 0;">${icon('users',15,'#7c3aed')} Accesos rápidos</h3>
+        ${[{view:'contacts',label:'Ver contactos',ico:'users'},{view:'meeting',label:'Analizar reunión',ico:'mic'},{view:'commitments',label:'Compromisos',ico:'checklist'},{view:'stats',label:'Estadísticas',ico:'barChart'},{view:'calendar',label:'Calendario',ico:'calendar'}].map(x=>`
+        <button data-action="goto" data-view="${x.view}" class="w-full" style="text-align:left;background:none;border:1px solid var(--gray-100);border-radius:12px;padding:12px 14px;cursor:pointer;font-family:inherit;font-size:13px;display:flex;align-items:center;gap:10px;margin-bottom:6px;transition:background .15s;" onmouseover="this.style.background='var(--gray-50)'" onmouseout="this.style.background='none'">
+          ${icon(x.ico,16,'var(--intelligence-violet)')} ${x.label}
+        </button>`).join('')}
+      </div>
+    </div>`;
+}
+
+function renderContactsList(){
+  const depts=S.contactFilters.depts, muns=S.contactFilters.muns, cats=S.contactFilters.cats;
+  return `
+    <div class="flex items-center justify-between mb-1">
+      <h1 class="page-title" style="margin-bottom:0;">Contactos</h1>
+      <div class="flex gap-2">
+        <button class="export-btn" data-action="open-import">${icon('download',13)} Importar Excel</button>
+        <button class="export-btn" data-action="export-contacts-xlsx">${icon('download',13)} Excel</button>
+        <button class="export-btn" data-action="export-contacts-pdf">${icon('download',13)} PDF</button>
+        <button class="btn-secondary" data-action="toggle-add-contact">${icon('plus',14)} Agregar</button>
+      </div>
+    </div>
+    <p class="page-subtitle">Red de contactos políticos del despacho.</p>
+    ${S.showAddContact?renderAddContactForm():''}
+    <input class="search-input mb-4" id="contacts-q" placeholder="Buscar por nombre, cargo, categoría…" value="${escHtml(S.contactsQ)}" />
+    ${depts.length||muns.length||cats.length?`
+    <div class="flex gap-2 mb-4" style="flex-wrap:wrap;">
+      <select class="input-sm" id="f-dept" style="width:auto;">
+        <option value="">Todos los departamentos</option>
+        ${depts.map(d=>`<option value="${escHtml(d)}" ${S.contactsDept===d?'selected':''}>${escHtml(d)}</option>`).join('')}
+      </select>
+      <select class="input-sm" id="f-mun" style="width:auto;">
+        <option value="">Todos los municipios</option>
+        ${muns.map(m=>`<option value="${escHtml(m)}" ${S.contactsMun===m?'selected':''}>${escHtml(m)}</option>`).join('')}
+      </select>
+      <select class="input-sm" id="f-cat" style="width:auto;">
+        <option value="">Todas las categorías</option>
+        ${cats.map(c=>`<option value="${escHtml(c)}" ${S.contactsCat===c?'selected':''}>${escHtml(c)}</option>`).join('')}
+      </select>
+      ${S.contactsDept||S.contactsMun||S.contactsCat?`<button class="link-btn" data-action="clear-contact-filters">Limpiar</button>`:''}
+    </div>`:''}
+    <div class="grid grid-2">
+      ${S.contacts.map(c=>{
+        const {score}=calcScore(c,S.commitments);
+        return `<div class="card card-clickable p-5" data-action="select-contact" data-id="${c.id}">
+          <div class="flex items-start gap-3">
+            <div class="avatar" style="width:44px;height:44px;font-size:14px;">${initials(c.name)}</div>
+            <div class="min-w-0 flex-1">
+              <p class="font-semibold text-gray-900" style="margin:0;">${escHtml(c.name)}</p>
+              <p class="text-sm text-gray-500" style="margin:2px 0;">${escHtml(c.cargo||'')}</p>
+              <div class="flex items-center gap-2 text-xs text-gray-400">${icon('pin',12)} ${escHtml(formatLocation(c)||'—')}</div>
+            </div>
+            <span class="chip" style="background:#f5f3ff;color:var(--intelligence-violet);border-color:#ddd6fe;font-weight:700;">${Math.round(score*100)}</span>
+          </div>
+          ${c.categorias?`<div class="flex gap-1" style="flex-wrap:wrap;margin-top:8px;">${categoriasChips(c)}</div>`:''}
+          ${c.company?`<p class="text-xs text-gray-400" style="margin:6px 0 0 0;">${icon('building',11,'currentColor')} ${escHtml(c.company.name)}</p>`:''}
+          <p class="text-xs text-gray-400" style="margin:10px 0 0 0;">Última interacción: ${relDays(c.last_interaction_at)}</p>
+        </div>`;
+      }).join('')||'<p class="text-sm text-gray-400">Sin resultados.</p>'}
+    </div>
+    ${renderPager(S.contactsTotal,S.contactsPage,24,'contacts-prev','contacts-next')}`;
+}
+
+function renderAddContactForm(){
+  const DEPTS=['Amazonas','Antioquia','Arauca','Atlántico','Bogotá D.C.','Bolívar','Boyacá','Caldas','Caquetá','Casanare','Cauca','Cesar','Chocó','Córdoba','Cundinamarca','Guainía','Guaviare','Huila','La Guajira','Magdalena','Meta','Nariño','Norte de Santander','Putumayo','Quindío','Risaralda','San Andrés y Providencia','Santander','Sucre','Tolima','Valle del Cauca','Vaupés','Vichada'];
+  return `<div class="card p-5 mb-4">
+    <h3 class="font-semibold text-sm" style="margin:0 0 12px 0;">Nuevo contacto</h3>
+    <div class="edit-grid">
+      <div><label>Nombre *</label><input class="input-sm" id="nc-name" placeholder="Nombre completo" /></div>
+      <div><label>Cargo</label><input class="input-sm" id="nc-cargo" placeholder="Ej. Secretario de Salud" /></div>
+      <div><label>Organización</label><input class="input-sm" id="nc-org" placeholder="Ej. Gobernación del Tolima" /></div>
+      <div><label>Influencia (0–1)</label><input class="input-sm" id="nc-inf" type="number" min="0" max="1" step="0.05" value="0.5" /></div>
+      <div><label>Departamento</label>
+        <select class="input-sm" id="nc-dept">
+          <option value="">—</option>
+          ${DEPTS.map(d=>`<option value="${d}">${d}</option>`).join('')}
+        </select>
+      </div>
+      <div><label>Municipio</label><input class="input-sm" id="nc-mun" placeholder="Ej. Ibagué" /></div>
+      <div><label>Corregimiento</label><input class="input-sm" id="nc-corr" placeholder="Opcional" /></div>
+      <div><label>Vereda</label><input class="input-sm" id="nc-vda" placeholder="Opcional" /></div>
+      <div style="grid-column:1/-1;"><label>Categorías (separadas por coma)</label><input class="input-sm" id="nc-cats" placeholder="Ej. JAC, Líder campesino" /></div>
+      <div style="grid-column:1/-1;"><label>Empresa vinculada</label>
+        <select class="input-sm" id="nc-company">
+          <option value="">— Ninguna —</option>
+          ${S.companies.map(co=>`<option value="${co.id}">${escHtml(co.name)}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="edit-actions">
+      <button class="btn-primary" data-action="save-new-contact">Guardar</button>
+      <button class="btn-secondary" data-action="cancel-add-contact">Cancelar</button>
+    </div>
+  </div>`;
+}
+
+async function renderContactDetail(id){
+  const {data:contact}=await sb.from('contacts').select('*,company:companies(id,name)').eq('id',id).single();
+  const {data:mine}=await sb.from('commitments').select('*,contact:contacts(name)').eq('contact_id',id);
+  const {data:rels}=await sb.from('contact_relationships').select('*,related:contacts!contact_relationships_related_contact_id_fkey(id,name),from_contact:contacts!contact_relationships_contact_id_fkey(id,name)').or(`contact_id.eq.${id},related_contact_id.eq.${id}`);
+  const {score,breakdown}=calcScore(contact,mine||[]);
+  const isEditing=S.editingContactId===id;
+  const main=document.getElementById('main-content');
+  main.innerHTML=`
+    <button class="back-btn" data-action="back-to-contacts">${icon('arrowLeft',15)} Volver a contactos</button>
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-4">
+        <div class="avatar" style="width:64px;height:64px;font-size:18px;border-radius:18px;">${initials(contact.name)}</div>
+        <div>
+          <h1 class="page-title" style="margin-bottom:2px;">${escHtml(contact.name)}</h1>
+          <p class="text-sm text-gray-500" style="margin:0;">${escHtml(contact.cargo||'')}${contact.organizacion?' · '+escHtml(contact.organizacion):''}</p>
+          <div class="flex items-center gap-2 text-xs text-gray-400 mt-1">${icon('pin',12)} ${escHtml(formatLocation(contact)||'Sin ubicación')}</div>
+          ${contact.categorias?`<div class="flex gap-1" style="flex-wrap:wrap;margin-top:6px;">${categoriasChips(contact)}</div>`:''}
+          ${contact.company?`<button class="link-btn" data-action="select-company" data-id="${contact.company.id}" style="margin-top:6px;">${icon('building',12)} ${escHtml(contact.company.name)}</button>`:''}
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <button class="btn-secondary" data-action="toggle-edit-contact" data-id="${id}">${isEditing?'Cancelar':icon('edit',14)+' Editar'}</button>
+        <button class="btn-secondary" data-action="delete-contact" data-id="${id}" style="color:#be123c;">Eliminar</button>
+      </div>
+    </div>
+    ${isEditing?renderEditContactForm(contact):''}
+    ${contact.notes?`<div class="notes-box mb-4">${escHtml(contact.notes)}</div>`:''}
+    <div class="grid grid-3">
+      <div class="card p-5">
+        <h3 class="font-semibold text-sm" style="margin:0 0 14px 0;">Score de relación</h3>
+        ${['recencia','frecuencia','influencia','cumplimiento'].map(k=>`
+          <div class="score-bar-row">
+            <span class="score-bar-label">${k.charAt(0).toUpperCase()+k.slice(1)}</span>
+            <div class="score-bar-track"><div class="score-bar-fill" style="width:${Math.round(breakdown[k]*100)}%"></div></div>
+            <span class="text-xs text-gray-500">${Math.round(breakdown[k]*100)}</span>
+          </div>`).join('')}
+        <div class="flex items-center justify-between" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--gray-100);">
+          <span class="text-sm font-medium text-gray-700">Score total</span>
+          <span class="text-lg font-bold text-violet">${Math.round(score*100)}</span>
+        </div>
+      </div>
+      <div class="card p-5 col-2">
+        <h3 class="font-semibold text-sm" style="margin:0 0 8px 0;">${icon('checklist',15,'#7c3aed')} Compromisos (${(mine||[]).length})</h3>
+        ${(mine||[]).length===0?'<p class="text-sm text-gray-400">Sin compromisos.</p>':(mine||[]).map(c=>commitmentRow(c,[],false)).join('')}
+      </div>
+    </div>
+    <div class="card p-5 mt-4">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="font-semibold text-sm" style="margin:0;">Relaciones con otros contactos</h3>
+        <button class="link-btn" data-action="toggle-add-rel" data-contact-id="${id}">+ Agregar</button>
+      </div>
+      ${S.showAddRelationship?`<div style="background:var(--gray-50);border-radius:12px;padding:12px;margin-bottom:12px;">
+        <div class="edit-grid" style="margin-bottom:8px;">
+          <div><label>Contacto *</label>
+            <select class="input-sm" id="rel-contact-id">
+              <option value="">— Seleccionar —</option>
+              ${S.contacts.filter(c=>c.id!==id).map(c=>`<option value="${c.id}">${escHtml(c.name)}</option>`).join('')}
+            </select>
+          </div>
+          <div><label>Tipo</label>
+            <select class="input-sm" id="rel-type">
+              <option value="reporta_a">Reporta a</option><option value="aliado">Aliado</option>
+              <option value="rival">Rival</option><option value="companero">Compañero</option>
+              <option value="miembro_de">Miembro de</option><option value="otro">Otro</option>
+            </select>
+          </div>
+          <div style="grid-column:1/-1;"><label>Notas</label><input class="input-sm" id="rel-notes" placeholder="Opcional" /></div>
+        </div>
+        <button class="btn-primary" style="font-size:13px;" data-action="save-rel" data-contact-id="${id}">Guardar</button>
+      </div>`:''}
+      ${(rels||[]).length===0?'<p class="text-sm text-gray-400">Sin relaciones registradas.</p>':(rels||[]).map(r=>{
+        const isSource=r.contact_id===id;
+        const other=isSource?r.related:r.from_contact;
+        return `<div class="flex items-center justify-between" style="padding:8px 0;border-top:1px solid var(--gray-50);">
+          <div class="flex items-center gap-2">
+            <span class="rel-tag rel-${r.relationship_type}">${r.relationship_type.replace('_',' ')}</span>
+            <span class="text-sm text-gray-800">${escHtml(other?.name||'—')}</span>
+            ${r.notes?`<span class="text-xs text-gray-400">— ${escHtml(r.notes)}</span>`:''}
+          </div>
+          <button class="icon-btn" data-action="delete-rel" data-rel-id="${r.id}">${icon('x',14)}</button>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+function renderEditContactForm(c){
+  const DEPTS=['Amazonas','Antioquia','Arauca','Atlántico','Bogotá D.C.','Bolívar','Boyacá','Caldas','Caquetá','Casanare','Cauca','Cesar','Chocó','Córdoba','Cundinamarca','Guainía','Guaviare','Huila','La Guajira','Magdalena','Meta','Nariño','Norte de Santander','Putumayo','Quindío','Risaralda','San Andrés y Providencia','Santander','Sucre','Tolima','Valle del Cauca','Vaupés','Vichada'];
+  return `<div class="card p-5 mb-4" id="edit-contact-form">
+    <h3 class="font-semibold text-sm" style="margin:0 0 12px 0;">Editar contacto</h3>
+    <div class="edit-grid">
+      <div><label>Nombre *</label><input class="input-sm" data-field="name" value="${escHtml(c.name)}" /></div>
+      <div><label>Cargo</label><input class="input-sm" data-field="cargo" value="${escHtml(c.cargo||'')}" /></div>
+      <div><label>Organización</label><input class="input-sm" data-field="organizacion" value="${escHtml(c.organizacion||'')}" /></div>
+      <div><label>Influencia</label><input class="input-sm" type="number" min="0" max="1" step="0.05" data-field="influence" value="${c.influence||0.5}" /></div>
+      <div><label>Departamento</label>
+        <select class="input-sm" data-field="departamento">
+          <option value="">—</option>
+          ${DEPTS.map(d=>`<option value="${d}" ${c.departamento===d?'selected':''}>${d}</option>`).join('')}
+        </select>
+      </div>
+      <div><label>Municipio</label><input class="input-sm" data-field="municipio" value="${escHtml(c.municipio||'')}" /></div>
+      <div><label>Corregimiento</label><input class="input-sm" data-field="corregimiento" value="${escHtml(c.corregimiento||'')}" /></div>
+      <div><label>Vereda</label><input class="input-sm" data-field="vereda" value="${escHtml(c.vereda||'')}" /></div>
+      <div style="grid-column:1/-1;"><label>Categorías</label><input class="input-sm" data-field="categorias" value="${escHtml(c.categorias||'')}" /></div>
+      <div style="grid-column:1/-1;"><label>Notas (memo privado)</label><textarea class="input-sm" data-field="notes" rows="3" style="resize:vertical;">${escHtml(c.notes||'')}</textarea></div>
+      <div style="grid-column:1/-1;"><label>Empresa vinculada</label>
+        <select class="input-sm" data-field="company_id">
+          <option value="">— Ninguna —</option>
+          ${S.companies.map(co=>`<option value="${co.id}" ${c.company_id===co.id?'selected':''}>${escHtml(co.name)}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="edit-actions">
+      <button class="btn-primary" data-action="save-contact-edit" data-id="${c.id}">Guardar cambios</button>
+      <button class="btn-secondary" data-action="toggle-edit-contact" data-id="${c.id}">Cancelar</button>
+    </div>
+  </div>`;
+}
+
+function renderCompaniesList(){
+  return `
+    <div class="flex items-center justify-between mb-1">
+      <h1 class="page-title" style="margin-bottom:0;">Empresas</h1>
+      <button class="btn-secondary" data-action="toggle-add-company">${icon('plus',14)} Agregar empresa</button>
+    </div>
+    <p class="page-subtitle">Negocios y gremios vinculados al despacho.</p>
+    ${S.showAddCompany?renderAddCompanyForm():''}
+    <input class="search-input mb-4" id="companies-q" placeholder="Buscar por nombre, NIT, sector…" value="${escHtml(S.companiesQ)}" />
+    <div class="grid grid-2">
+      ${S.companies.map(co=>`
+        <div class="card card-clickable p-5" data-action="select-company" data-id="${co.id}">
+          <div class="flex items-start gap-3">
+            <div class="avatar" style="width:44px;height:44px;font-size:14px;border-radius:12px;">${icon('building',20,'#fff')}</div>
+            <div class="min-w-0 flex-1">
+              <p class="font-semibold text-gray-900" style="margin:0;">${escHtml(co.name)}</p>
+              <p class="text-sm text-gray-500" style="margin:2px 0;">${escHtml(co.sector||'Sector sin especificar')}</p>
+              <div class="flex items-center gap-2 text-xs text-gray-400">${icon('pin',12)} ${escHtml([co.municipio,co.departamento].filter(Boolean).join(', ')||'—')}</div>
+            </div>
+          </div>
+        </div>`).join('')||'<p class="text-sm text-gray-400">Sin empresas.</p>'}
+    </div>
+    ${renderPager(S.companiesTotal,S.companiesPage,24,'companies-prev','companies-next')}`;
+}
+
+function renderAddCompanyForm(){
+  const SECTORS=['Agropecuario','Comercio','Construcción','Educación','Energía','Financiero','Industria','Minería','Salud','Servicios','Tecnología','Transporte','Turismo','Otro'];
+  return `<div class="card p-5 mb-4">
+    <h3 class="font-semibold text-sm" style="margin:0 0 12px 0;">Nueva empresa</h3>
+    <div class="edit-grid">
+      <div><label>Nombre / razón social *</label><input class="input-sm" id="nco-name" /></div>
+      <div><label>NIT</label><input class="input-sm" id="nco-nit" /></div>
+      <div><label>Sector</label>
+        <select class="input-sm" id="nco-sector"><option value="">—</option>${SECTORS.map(s=>`<option value="${s}">${s}</option>`).join('')}</select>
+      </div>
+      <div><label># empleados</label><input class="input-sm" id="nco-emp" type="number" min="0" /></div>
+      <div><label>Departamento</label><input class="input-sm" id="nco-dept" /></div>
+      <div><label>Municipio</label><input class="input-sm" id="nco-mun" /></div>
+      <div><label>Teléfono</label><input class="input-sm" id="nco-tel" /></div>
+      <div><label>Email</label><input class="input-sm" id="nco-email" type="email" /></div>
+      <div><label>Sitio web</label><input class="input-sm" id="nco-web" /></div>
+      <div><label>Dirección</label><input class="input-sm" id="nco-dir" /></div>
+      <div style="grid-column:1/-1;"><label>Notas</label><input class="input-sm" id="nco-notas" /></div>
+    </div>
+    <div class="edit-actions">
+      <button class="btn-primary" data-action="save-new-company">Guardar</button>
+      <button class="btn-secondary" data-action="cancel-add-company">Cancelar</button>
+    </div>
+  </div>`;
+}
+
+async function renderCompanyDetail(id){
+  const {data:co}=await sb.from('companies').select('*').eq('id',id).single();
+  const {data:emps}=await sb.from('company_employees').select('*').eq('company_id',id);
+  const {data:linked}=await sb.from('contacts').select('*').eq('company_id',id);
+  const isEditing=S.editingCompanyId===id;
+  const main=document.getElementById('main-content');
+  main.innerHTML=`
+    <button class="back-btn" data-action="back-to-companies">${icon('arrowLeft',15)} Volver a empresas</button>
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-4">
+        <div class="avatar" style="width:64px;height:64px;border-radius:18px;">${icon('building',26,'#fff')}</div>
+        <div>
+          <h1 class="page-title" style="margin-bottom:2px;">${escHtml(co.name)}</h1>
+          <p class="text-sm text-gray-500" style="margin:0;">${escHtml(co.sector||'—')}${co.nit?' · NIT '+escHtml(co.nit):''}</p>
+          <div class="flex items-center gap-2 text-xs text-gray-400 mt-1">${icon('pin',12)} ${escHtml([co.municipio,co.departamento].filter(Boolean).join(', ')||'Sin ubicación')}</div>
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <button class="btn-secondary" data-action="toggle-edit-company" data-id="${id}">${isEditing?'Cancelar':icon('edit',14)+' Editar'}</button>
+        <button class="btn-secondary" data-action="delete-company" data-id="${id}" style="color:#be123c;">Eliminar</button>
+      </div>
+    </div>
+    ${isEditing?renderEditCompanyForm(co):''}
+    <div class="grid grid-3 mb-4">
+      <div class="card p-5">
+        <h3 class="font-semibold text-sm" style="margin:0 0 12px 0;">Datos generales</h3>
+        ${co.numero_empleados?`<p class="text-sm text-gray-700 mb-2">${co.numero_empleados} empleados (aprox.)</p>`:''}
+        ${co.telefono?`<p class="text-sm text-gray-700 mb-2">${escHtml(co.telefono)}</p>`:''}
+        ${co.email?`<p class="text-sm text-gray-700 mb-2">${escHtml(co.email)}</p>`:''}
+        ${co.sitio_web?`<p class="text-sm mb-2"><a href="${escHtml(co.sitio_web)}" target="_blank" rel="noopener" class="link-btn">${escHtml(co.sitio_web)}</a></p>`:''}
+        ${co.direccion?`<p class="text-sm text-gray-700 mb-2">${escHtml(co.direccion)}</p>`:''}
+        ${co.notas?`<div class="notes-box" style="margin-top:8px;">${escHtml(co.notas)}</div>`:''}
+      </div>
+      <div class="card p-5 col-2">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-semibold text-sm" style="margin:0;">Directorio de empleados (${(emps||[]).length})</h3>
+          <button class="link-btn" data-action="toggle-add-employee">+ Agregar empleado</button>
+        </div>
+        ${S.showAddEmployee?`<div style="background:var(--gray-50);border-radius:12px;padding:12px;margin-bottom:12px;">
+          <div class="edit-grid" style="margin-bottom:8px;">
+            <div><label>Nombre *</label><input class="input-sm" id="ne-name" /></div>
+            <div><label>Cargo</label><input class="input-sm" id="ne-cargo" /></div>
+            <div><label>Teléfono</label><input class="input-sm" id="ne-tel" /></div>
+            <div><label>Email</label><input class="input-sm" id="ne-email" type="email" /></div>
+          </div>
+          <button class="btn-primary" style="font-size:13px;" data-action="save-employee" data-company-id="${id}">Guardar</button>
+        </div>`:''}
+        ${(emps||[]).map(e=>`
+          <div class="flex items-center justify-between" style="padding:8px 0;border-top:1px solid var(--gray-50);">
+            <div>
+              <p class="text-sm text-gray-800" style="margin:0;">${escHtml(e.name)}${e.cargo?' · '+escHtml(e.cargo):''}</p>
+              <p class="text-xs text-gray-400" style="margin:2px 0 0 0;">${[e.telefono,e.email].filter(Boolean).map(escHtml).join(' · ')||'Sin contacto'}</p>
+            </div>
+            <button class="icon-btn" data-action="delete-employee" data-id="${e.id}">${icon('x',14)}</button>
+          </div>`).join('')||'<p class="text-sm text-gray-400">Sin empleados.</p>'}
+      </div>
+    </div>
+    <div class="card p-5">
+      <h3 class="font-semibold text-sm" style="margin:0 0 12px 0;">Contactos políticos vinculados (${(linked||[]).length})</h3>
+      ${(linked||[]).map(c=>`
+        <button data-action="select-contact" data-id="${c.id}" class="w-full" style="text-align:left;background:none;border:none;cursor:pointer;font-family:inherit;padding:8px 0;border-top:1px solid var(--gray-50);display:flex;align-items:center;justify-content:space-between;">
+          <span class="text-sm font-medium text-gray-800">${escHtml(c.name)}</span>
+          <span class="text-xs text-gray-400">${escHtml(c.cargo||'')}</span>
+        </button>`).join('')||'<p class="text-sm text-gray-400">Sin contactos vinculados.</p>'}
+    </div>`;
+}
+
+function renderEditCompanyForm(co){
+  return `<div class="card p-5 mb-4" id="edit-company-form">
+    <h3 class="font-semibold text-sm" style="margin:0 0 12px 0;">Editar empresa</h3>
+    <div class="edit-grid">
+      <div><label>Nombre *</label><input class="input-sm" data-field="name" value="${escHtml(co.name)}" /></div>
+      <div><label>NIT</label><input class="input-sm" data-field="nit" value="${escHtml(co.nit||'')}" /></div>
+      <div><label>Sector</label><input class="input-sm" data-field="sector" value="${escHtml(co.sector||'')}" /></div>
+      <div><label># empleados</label><input class="input-sm" type="number" data-field="numero_empleados" value="${co.numero_empleados||''}" /></div>
+      <div><label>Departamento</label><input class="input-sm" data-field="departamento" value="${escHtml(co.departamento||'')}" /></div>
+      <div><label>Municipio</label><input class="input-sm" data-field="municipio" value="${escHtml(co.municipio||'')}" /></div>
+      <div><label>Teléfono</label><input class="input-sm" data-field="telefono" value="${escHtml(co.telefono||'')}" /></div>
+      <div><label>Email</label><input class="input-sm" data-field="email" value="${escHtml(co.email||'')}" /></div>
+      <div><label>Sitio web</label><input class="input-sm" data-field="sitio_web" value="${escHtml(co.sitio_web||'')}" /></div>
+      <div><label>Dirección</label><input class="input-sm" data-field="direccion" value="${escHtml(co.direccion||'')}" /></div>
+      <div style="grid-column:1/-1;"><label>Notas</label><textarea class="input-sm" data-field="notas" rows="2" style="resize:vertical;">${escHtml(co.notas||'')}</textarea></div>
+    </div>
+    <div class="edit-actions">
+      <button class="btn-primary" data-action="save-company-edit" data-id="${co.id}">Guardar</button>
+      <button class="btn-secondary" data-action="toggle-edit-company" data-id="${co.id}">Cancelar</button>
+    </div>
+  </div>`;
+}
+
+function renderCommitmentsList(){
+  const STATUS_OPT=['pendiente','en_proceso','bloqueado','escalado','completado'];
+  const STATUS_L={pendiente:'Pendiente',en_proceso:'En proceso',bloqueado:'Bloqueado',escalado:'Escalado',completado:'Completado'};
+  return `
+    <div class="flex items-center justify-between mb-1">
+      <h1 class="page-title" style="margin-bottom:0;">Compromisos</h1>
+      <div class="flex gap-2">
+        <button class="export-btn" data-action="export-commitments-xlsx">${icon('download',13)} Excel</button>
+        <button class="export-btn" data-action="export-commitments-pdf">${icon('download',13)} PDF</button>
+        <button class="btn-secondary" data-action="toggle-add-commitment">${icon('plus',14)} Agregar</button>
+      </div>
+    </div>
+    <p class="page-subtitle">Todos los compromisos, ordenados por recientes.</p>
+    ${S.showAddCommitment?renderAddCommitmentForm():''}
+    <div class="flex gap-2 mb-4" style="flex-wrap:wrap;">
+      <input class="search-input" id="commitments-q" placeholder="Buscar por texto o responsable…" value="${escHtml(S.commitmentsQ)}" style="flex:1;min-width:200px;" />
+      <select class="input-sm" id="commitments-status" style="width:auto;">
+        <option value="">Todos los estados</option>
+        ${STATUS_OPT.map(s=>`<option value="${s}" ${S.commitmentsStatus===s?'selected':''}>${STATUS_L[s]}</option>`).join('')}
+      </select>
+    </div>
+    <div class="card divide">${S.commitments.map(c=>commitmentRow(c,S.commitments,true)).join('')||'<p class="text-sm text-gray-400 p-4">Sin resultados.</p>'}</div>
+    ${renderPager(S.commitmentsTotal,S.commitmentsPage,50,'commitments-prev','commitments-next')}`;
+}
+
+function renderAddCommitmentForm(){
+  return `<div class="card p-5 mb-4">
+    <h3 class="font-semibold text-sm" style="margin:0 0 12px 0;">Nuevo compromiso</h3>
+    <div class="edit-grid">
+      <div style="grid-column:1/-1;"><label>Descripción *</label><input class="input-sm" id="ncm-text" placeholder="¿Qué se comprometió a hacer?" /></div>
+      <div><label>Responsable</label><input class="input-sm" id="ncm-resp" placeholder="Sin asignar" /></div>
+      <div><label>Fecha límite</label><input class="input-sm" type="date" id="ncm-due" /></div>
+      <div style="grid-column:1/-1;"><label>Contacto asociado</label>
+        <select class="input-sm" id="ncm-contact">
+          <option value="">— Sin contacto —</option>
+          ${S.contacts.map(c=>`<option value="${c.id}">${escHtml(c.name)}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="edit-actions">
+      <button class="btn-primary" data-action="save-new-commitment">Guardar</button>
+      <button class="btn-secondary" data-action="cancel-add-commitment">Cancelar</button>
+    </div>
+  </div>`;
+}
+
+function renderMeetingForm(){
+  const todayStr=new Date().toISOString().slice(0,10);
+  const m=S.meeting;
+  return `
+    <h1 class="page-title">Meeting Intelligence</h1>
+    <p class="page-subtitle">Pega una transcripción y el Rule Engine extrae compromisos automáticamente.</p>
+    <div class="card p-5 mb-4">
+      <div class="grid grid-2" style="gap:12px;margin-bottom:12px;">
+        <div>
+          <label class="text-xs font-medium text-gray-500" style="display:block;margin-bottom:4px;">Contacto asociado</label>
+          <select class="input-sm" id="meeting-contact">
+            <option value="">— Sin asociar —</option>
+            ${S.contacts.map(c=>`<option value="${c.id}" ${m.contactId===c.id?'selected':''}>${escHtml(c.name)}</option>`).join('')}
+          </select>
+        </div>
+        <div>
+          <label class="text-xs font-medium text-gray-500" style="display:block;margin-bottom:4px;">Fecha real de la reunión</label>
+          <input class="input-sm" type="date" id="meeting-date" value="${m.date||todayStr}" />
+          <p class="text-xs text-gray-400" style="margin:4px 0 0 0;">Afecta las fechas calculadas ("en dos semanas", etc.)</p>
+        </div>
+      </div>
+      <textarea class="transcript-input" id="meeting-text" rows="7" placeholder="Pega aquí la transcripción de la reunión...">${escHtml(m.text)}</textarea>
+      <button class="btn-primary mt-3" id="analyze-btn">${icon('wand',15)} Analizar con Rule Engine</button>
+    </div>
+    <div id="meeting-results">${m.result?renderMeetingResults(m.result,m.created):''}</div>`;
+}
+
+function renderMeetingResults(result,created){
+  if(!result) return '';
+  return `
+    <div class="card p-5">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="font-semibold text-sm" style="margin:0;">${result.sentences_analyzed} oraciones analizadas · ${result.commitments.length} compromiso(s) detectado(s)</h3>
+          ${result.llm_escalation_needed?`<p class="text-xs text-gray-500 mt-1">⚠️ Algunos compromisos tienen baja confianza — revísalos antes de guardar</p>`:''}
+        </div>
+        ${!created?`<button class="btn-primary" id="create-btn">Guardar en el CRM</button>`:`<span style="color:#10b981;font-size:13px;font-weight:600;">✓ CRM actualizado</span>`}
+      </div>
+      ${result.commitments.map((c,i)=>`
+        <div class="commitment-card ${c.requires_llm?'llm':''}" data-idx="${i}">
+          <div class="flex items-start justify-between gap-3">
+            <p class="text-sm text-gray-800" style="margin:0;flex:1;">${escHtml(c.text)}</p>
+            <span class="confidence-badge ${c.confidence>=.8?'confidence-high':c.confidence>=.6?'confidence-mid':'confidence-low'}">${Math.round(c.confidence*100)}%</span>
+          </div>
+          <p class="text-xs text-gray-400 mt-1">Patrón: ${escHtml(c.matched_pattern)}</p>
+          <div class="edit-grid" style="margin-top:8px;gap:8px;">
+            <div><label>Responsable</label><input class="input-sm" data-field="responsible" value="${escHtml(c.responsible||'')}" /></div>
+            <div><label>Fecha límite</label><input class="input-sm" type="date" data-field="due_date" value="${c.resolved_due_date||''}" /></div>
+          </div>
+        </div>`).join('')}
+      ${result.entities.filter(e=>e.entity_type!=='persona').length?`
+        <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--gray-100);">
+          <h4 class="font-semibold text-xs text-gray-500 mb-2">ENTIDADES DETECTADAS</h4>
+          <div class="flex gap-2" style="flex-wrap:wrap;">
+            ${result.entities.filter((e,i,a)=>a.findIndex(x=>x.value===e.value)===i).map(e=>`
+              <span class="chip" style="font-size:11px;">${escHtml(e.value)} <span style="opacity:.6;">${e.entity_type}</span></span>`).join('')}
+          </div>
+        </div>`:''}</div>`;
+}
+
+function renderMeetingsList(){
+  return `
+    <div class="flex items-center justify-between mb-1">
+      <h1 class="page-title" style="margin-bottom:0;">Historial de reuniones</h1>
+      <button class="export-btn" data-action="export-meetings-xlsx">${icon('download',13)} Excel</button>
+    </div>
+    <p class="page-subtitle">Transcripciones analizadas — memoria institucional del despacho.</p>
+    <div class="card divide">
+      ${S.meetings.map(m=>`
+        <div class="flex items-start justify-between gap-3 p-4 card-clickable" data-action="select-meeting" data-id="${m.id}">
+          <div class="min-w-0 flex-1">
+            <p class="text-sm text-gray-800" style="margin:0;">${escHtml((m.transcript_text||'').slice(0,140))}…</p>
+            <p class="text-xs text-gray-400" style="margin:4px 0 0 0;">
+              ${m.contact?.name?escHtml(m.contact.name)+' · ':''} ${formatDate(m.meeting_date||m.created_at?.slice(0,10))}
+              · ${(m.commitments_count?.[0]?.count||0)} compromiso(s)
+            </p>
+          </div>
+          ${icon('arrowLeft',16,'#9ca3af')}
+        </div>`).join('')||'<p class="text-sm text-gray-400 p-4">Sin reuniones analizadas todavía.</p>'}
+    </div>`;
+}
+
+async function renderMeetingDetail(id){
+  const {data:m}=await sb.from('meetings').select('*,contact:contacts(id,name)').eq('id',id).single();
+  const {data:cmts}=await sb.from('commitments').select('*,contact:contacts(name)').eq('meeting_id',id);
+  const main=document.getElementById('main-content');
+  main.innerHTML=`
+    <button class="back-btn" data-action="back-to-meetings">${icon('arrowLeft',15)} Volver al historial</button>
+    <div class="flex items-center justify-between mb-2">
+      <h1 class="page-title" style="margin-bottom:2px;">${m.contact?.name?escHtml(m.contact.name):'Sin contacto'}</h1>
+      <button class="btn-secondary" data-action="delete-meeting" data-id="${id}" style="color:#be123c;">Eliminar</button>
+    </div>
+    <p class="page-subtitle">${formatDate(m.meeting_date||m.created_at?.slice(0,10))} · ${m.sentences_analyzed} oraciones analizadas</p>
+    <div class="grid grid-2">
+      <div class="card p-5">
+        <h3 class="font-semibold text-sm mb-3">Transcripción completa</h3>
+        <p class="text-sm text-gray-700" style="line-height:1.7;white-space:pre-wrap;">${escHtml(m.transcript_text)}</p>
+        ${m.notes?`<div class="notes-box mt-3">${escHtml(m.notes)}</div>`:''}
+      </div>
+      <div class="card p-5">
+        <h3 class="font-semibold text-sm mb-3">${icon('checklist',15,'#7c3aed')} Compromisos generados (${(cmts||[]).length})</h3>
+        ${(cmts||[]).map(c=>commitmentRow(c,[],false)).join('')||'<p class="text-sm text-gray-400">Sin compromisos.</p>'}
+      </div>
+    </div>`;
+}
+
+function renderCalendar(){
+  const {calYear:yr,calMonth:mo,calEvents:events}=S;
+  const monthName=new Date(yr,mo,1).toLocaleDateString('es-CO',{month:'long',year:'numeric'});
+  const firstDay=new Date(yr,mo,1).getDay();
+  const daysInMonth=new Date(yr,mo+1,0).getDate();
+  const todayStr=new Date().toISOString().slice(0,10);
+  const byDay={};
+  events.forEach(e=>{ const d=e.due_date?.slice(8,10); if(d){if(!byDay[d])byDay[d]=[];byDay[d].push(e);} });
+  let cells='';
+  for(let i=0;i<firstDay;i++) cells+=`<div class="cal-day other-month"></div>`;
+  for(let d=1;d<=daysInMonth;d++){
+    const ds=`${yr}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday=ds===todayStr;
+    const devs=byDay[String(d).padStart(2,'0')]||[];
+    cells+=`<div class="cal-day${isToday?' today':''}">
+      <div class="cal-day-num">${d}</div>
+      ${devs.slice(0,3).map(e=>`<div class="cal-event ${calcRisk(e).level}" title="${escHtml(e.text)}">${escHtml(e.text)}</div>`).join('')}
+      ${devs.length>3?`<div style="font-size:9px;color:var(--gray-400);">+${devs.length-3}</div>`:''}
+    </div>`;
+  }
+  return `
+    <h1 class="page-title">Calendario</h1>
+    <p class="page-subtitle">Compromisos pendientes por fecha límite.</p>
+    <div class="card p-5">
+      <div class="flex items-center justify-between mb-4">
+        <button class="btn-secondary" data-action="cal-prev">← Anterior</button>
+        <h3 class="font-semibold" style="text-transform:capitalize;">${monthName}</h3>
+        <button class="btn-secondary" data-action="cal-next">Siguiente →</button>
+      </div>
+      <div class="cal-header-row">${['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'].map(d=>`<div class="cal-day-name">${d}</div>`).join('')}</div>
+      <div class="cal-grid">${cells}</div>
+      <p class="text-xs text-gray-400 mt-3">${events.length} compromiso(s) con fecha límite este mes</p>
+    </div>`;
+}
+
+function renderStats(){
+  const s=S.statsData;
+  if(!s) return '<div style="padding:40px;text-align:center;color:var(--gray-400);">Cargando estadísticas…</div>';
+  const STATUS_L={pendiente:'Pendiente',en_proceso:'En proceso',bloqueado:'Bloqueado',escalado:'Escalado',completado:'Completado'};
+  const maxMonth=Math.max(...(s.byMonth||[]).map(x=>x.count),1);
+  return `
+    <h1 class="page-title">Estadísticas</h1>
+    <p class="page-subtitle">Inteligencia sobre los propios datos del despacho.</p>
+    <div class="grid grid-3 mb-4">
+      ${[{v:s.totalContacts,l:'Contactos'},{v:s.total,l:'Compromisos totales'},{v:s.rate+'%',l:'Tasa de cumplimiento'},{v:s.totalMeetings,l:'Reuniones analizadas'},{v:s.totalCompanies,l:'Empresas'}].map(x=>`
+      <div class="card p-5 text-center"><p class="stat-big">${x.v}</p><p class="text-xs text-gray-500 mt-1">${x.l}</p></div>`).join('')}
+    </div>
+    <div class="grid grid-2">
+      <div class="card p-5">
+        <h3 class="font-semibold text-sm mb-3">Compromisos por estado</h3>
+        ${['pendiente','en_proceso','bloqueado','escalado','completado'].map(k=>{
+          const v=s.byStatus[k]||0, pct=s.total?Math.round(v/s.total*100):0;
+          return `<div class="bar-row"><span class="bar-label">${STATUS_L[k]}</span><div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div><span class="bar-val">${v}</span></div>`;
+        }).join('')}
+      </div>
+      <div class="card p-5">
+        <h3 class="font-semibold text-sm mb-3">Compromisos por mes (últimos 12)</h3>
+        ${s.byMonth.map(m=>{
+          const pct=Math.round(m.count/maxMonth*100);
+          return `<div class="bar-row"><span class="bar-label">${m.month}</span><div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div><span class="bar-val">${m.count}</span></div>`;
+        }).join('')||'<p class="text-sm text-gray-400">Sin datos todavía.</p>'}
+      </div>
+    </div>`;
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// RENDER PRINCIPAL
+// ══════════════════════════════════════════════════════════════════════════════
+const NAV=[
+  {id:'dashboard',label:'Command Center',ico:'dashboard'},
+  {id:'agenda',label:'Agenda',ico:'calendar'},
+  {id:'contacts',label:'Contactos',ico:'users'},
+  {id:'companies',label:'Empresas',ico:'building'},
+  {id:'meeting',label:'Reunión',ico:'mic'},
+  {id:'meetings',label:'Historial',ico:'fileText'},
+  {id:'commitments',label:'Compromisos',ico:'checklist'},
+  {id:'calendar',label:'Calendario',ico:'calendar'},
+  {id:'stats',label:'Estadísticas',ico:'barChart'},
+];
+
+function renderNav(){
+  document.getElementById('nav').innerHTML=NAV.map(n=>`
+    <button class="nav-item ${S.view===n.id?'active':''}" data-action="goto" data-view="${n.id}">
+      ${icon(n.ico,16,'currentColor')} ${n.label}
+    </button>`).join('');
+}
+
+async function render(){
+  renderNav();
+  const main=document.getElementById('main-content');
+  if(S.view==='agenda') { main.innerHTML = await renderAgendaDia(); return; }
+  if(S.view==='dashboard') main.innerHTML=renderDashboard();
+  else if(S.view==='import') main.innerHTML=renderImport();
+  else if(S.view==='contacts'&&!S.selectedContact) main.innerHTML=renderContactsList(), bindContactEvents();
+  else if(S.view==='contacts'&&S.selectedContact) await renderContactDetail(S.selectedContact);
+  else if(S.view==='companies'&&!S.selectedCompany) main.innerHTML=renderCompaniesList(), bindCompanyEvents();
+  else if(S.view==='companies'&&S.selectedCompany) await renderCompanyDetail(S.selectedCompany);
+  else if(S.view==='meeting') main.innerHTML=renderMeetingForm(), bindMeetingEvents();
+  else if(S.view==='meetings'&&!S.selectedMeeting) main.innerHTML=renderMeetingsList();
+  else if(S.view==='meetings'&&S.selectedMeeting) await renderMeetingDetail(S.selectedMeeting);
+  else if(S.view==='commitments') main.innerHTML=renderCommitmentsList(), bindCommitmentsEvents();
+  else if(S.view==='calendar') main.innerHTML=renderCalendar();
+  else if(S.view==='stats') main.innerHTML=renderStats();
+}
+
+function bindContactEvents(){
+  const qEl=document.getElementById('contacts-q');
+  if(qEl) qEl.addEventListener('input',debounce(async e=>{S.contactsQ=e.target.value;S.contactsPage=1;await loadContacts();render();},350));
+  ['f-dept','f-mun','f-cat'].forEach((id,i)=>{
+    const el=document.getElementById(id);
+    if(!el) return;
+    el.addEventListener('change',async e=>{
+      if(i===0) S.contactsDept=e.target.value;
+      else if(i===1) S.contactsMun=e.target.value;
+      else S.contactsCat=e.target.value;
+      S.contactsPage=1; await loadContacts(); render();
+    });
+  });
+}
+function bindCompanyEvents(){
+  const qEl=document.getElementById('companies-q');
+  if(qEl) qEl.addEventListener('input',debounce(async e=>{S.companiesQ=e.target.value;S.companiesPage=1;await loadCompanies();render();},350));
+}
+function bindCommitmentsEvents(){
+  const qEl=document.getElementById('commitments-q');
+  if(qEl) qEl.addEventListener('input',debounce(async e=>{S.commitmentsQ=e.target.value;S.commitmentsPage=1;await loadCommitments();render();},350));
+  const stEl=document.getElementById('commitments-status');
+  if(stEl) stEl.addEventListener('change',async e=>{S.commitmentsStatus=e.target.value;S.commitmentsPage=1;await loadCommitments();render();});
+}
+function bindMeetingEvents(){
+  document.getElementById('meeting-contact')?.addEventListener('change',e=>S.meeting.contactId=e.target.value||null);
+  document.getElementById('meeting-date')?.addEventListener('change',e=>S.meeting.date=e.target.value);
+  document.getElementById('meeting-text')?.addEventListener('input',e=>{S.meeting.text=e.target.value;S.meeting.result=null;S.meeting.created=false;});
+  document.getElementById('analyze-btn')?.addEventListener('click',async()=>{
+    const text=S.meeting.text;
+    if(!text.trim()){toast('Pega una transcripción primero',true);return;}
+    const {data:contacts}=await sb.from('contacts').select('id,name');
+    try{
+      const res=await fetch(RENDER_URL+'/analyze',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({text,meeting_date:S.meeting.date||null,known_contacts:contacts||[]})});
+      S.meeting.result=await res.json();S.meeting.created=false;
+      document.getElementById('meeting-results').innerHTML=renderMeetingResults(S.meeting.result,false);
+      document.getElementById('create-btn')?.addEventListener('click',async()=>{
+        const cards=document.querySelectorAll('[data-idx]');
+        const commitments=[...cards].map(card=>{
+          const idx=Number(card.dataset.idx);
+          const orig=S.meeting.result.commitments[idx];
+          return{text:orig.text,responsible:card.querySelector('[data-field="responsible"]').value||null,
+            due_date:card.querySelector('[data-field="due_date"]').value||null,requires_llm:orig.requires_llm};
+        });
+        const {data:meeting,error:me}=await sb.from('meetings').insert({
+          contact_id:S.meeting.contactId,transcript_text:text,meeting_date:S.meeting.date||null,
+          sentences_analyzed:S.meeting.result.sentences_analyzed,llm_escalation_needed:S.meeting.result.llm_escalation_needed
+        }).select().single();
+        if(me){toast(me.message,true);return;}
+        for(const c of commitments){
+          await sb.from('commitments').insert({contact_id:S.meeting.contactId,meeting_id:meeting.id,...c,status:'pendiente',source:'rule_engine'});
+        }
+        if(S.meeting.contactId){
+          const {data:ct}=await sb.from('contacts').select('interactions_12m,last_interaction_at').eq('id',S.meeting.contactId).single();
+          await sb.from('contacts').update({interactions_12m:(ct?.interactions_12m||0)+1,last_interaction_at:S.meeting.date||new Date().toISOString().slice(0,10)}).eq('id',S.meeting.contactId);
+        }
+        S.meeting.created=true;
+        document.getElementById('meeting-results').innerHTML=renderMeetingResults(S.meeting.result,true);
+        await loadCommitments();
+        toast('Reunión y compromisos guardados ✓');
+      });
+    }catch(err){toast('Error conectando con el Rule Engine: '+err.message,true);}
+  });
+}
+
+function debounce(fn,ms){let t;return(...args)=>{clearTimeout(t);t=setTimeout(()=>fn(...args),ms);};}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// MANEJADOR GLOBAL DE CLICKS
+// ══════════════════════════════════════════════════════════════════════════════
+document.addEventListener('click',async e=>{
+  const el=e.target.closest('[data-action]');
+  if(!el) return;
+  const action=el.dataset.action;
+
+  if(action==='goto'){
+    S.view=el.dataset.view;S.selectedContact=null;S.selectedCompany=null;S.selectedMeeting=null;
+    S.editingContactId=null;S.editingCompanyId=null;
+    if(S.view==='dashboard'){await loadCommitments();await sb.from('contacts').select('*',{count:'exact',head:true}).then(({count})=>S.contactsTotal=count);}
+    if(S.view==='contacts'){S.contactsQ='';S.contactsPage=1;await Promise.all([loadContacts(),loadContactFilters(),loadCompanies()]);}
+    if(S.view==='companies'){S.companiesQ='';S.companiesPage=1;await loadCompanies();}
+    if(S.view==='meeting'){await loadContacts();}
+    if(S.view==='meetings') await loadMeetings();
+    if(S.view==='commitments'){S.commitmentsQ='';S.commitmentsPage=1;await Promise.all([loadCommitments(),loadContacts()]);}
+    if(S.view==='calendar') await loadCalendar(S.calYear,S.calMonth);
+    if(S.view==='agenda'){ await loadAgendaDia(S.agendaFecha); await loadAgendaMes(); }
+    if(S.view==='stats') await loadStats();
+    render();
+  }
+
+  // Navegación
+  else if(action==='select-contact'){ S.selectedContact=el.dataset.id;S.view='contacts';S.editingContactId=null;await render(); }
+  else if(action==='back-to-contacts'){ S.selectedContact=null;S.editingContactId=null;await loadContacts();render(); }
+  else if(action==='select-company'){ S.selectedCompany=el.dataset.id;S.view='companies';S.editingCompanyId=null;await render(); }
+  else if(action==='back-to-companies'){ S.selectedCompany=null;S.editingCompanyId=null;await loadCompanies();render(); }
+  else if(action==='select-meeting'){ S.selectedMeeting=el.dataset.id;S.view='meetings';render(); }
+  else if(action==='back-to-meetings'){ S.selectedMeeting=null;render(); }
+
+  // Contactos CRUD
+  else if(action==='toggle-add-contact'){S.showAddContact=!S.showAddContact;if(S.showAddContact&&!S.companies.length)await loadCompanies();render();}
+  else if(action==='cancel-add-contact'){S.showAddContact=false;render();}
+  else if(action==='save-new-contact'){
+    const name=document.getElementById('nc-name').value.trim();
+    if(!name){toast('El nombre es obligatorio',true);return;}
+    const payload={name,cargo:document.getElementById('nc-cargo').value.trim()||null,organizacion:document.getElementById('nc-org').value.trim()||null,
+      influence:parseFloat(document.getElementById('nc-inf').value)||0.5,departamento:document.getElementById('nc-dept').value||null,
+      municipio:document.getElementById('nc-mun').value.trim()||null,corregimiento:document.getElementById('nc-corr').value.trim()||null,
+      vereda:document.getElementById('nc-vda').value.trim()||null,categorias:document.getElementById('nc-cats').value.trim()||null,
+      company_id:document.getElementById('nc-company').value||null};
+    const {error}=await sb.from('contacts').insert(payload);
+    if(error){toast(error.message,true);return;}
+    S.showAddContact=false;toast('Contacto creado ✓');
+    await loadContacts();await loadContactFilters();render();
+  }
+  else if(action==='toggle-edit-contact'){
+    S.editingContactId=S.editingContactId===el.dataset.id?null:el.dataset.id;
+    if(S.editingContactId&&!S.companies.length)await loadCompanies();
+    await renderContactDetail(S.selectedContact);
+  }
+  else if(action==='save-contact-edit'){
+    const form=document.getElementById('edit-contact-form');
+    const payload={};
+    form.querySelectorAll('[data-field]').forEach(inp=>{
+      const v=inp.value.trim();
+      payload[inp.dataset.field]=v===''?null:(inp.type==='number'&&v?parseFloat(v):v||null);
+    });
+    if(!payload.name){toast('El nombre es obligatorio',true);return;}
+    const {error}=await sb.from('contacts').update(payload).eq('id',el.dataset.id);
+    if(error){toast(error.message,true);return;}
+    S.editingContactId=null;toast('Contacto actualizado ✓');
+    await loadContacts();await renderContactDetail(S.selectedContact);
+  }
+  else if(action==='delete-contact'){
+    if(!confirm('¿Eliminar este contacto? Sus compromisos y reuniones se conservan.')) return;
+    await sb.from('contacts').delete().eq('id',el.dataset.id);
+    toast('Contacto eliminado');S.selectedContact=null;S.contactsPage=1;
+    await loadContacts();render();
+  }
+  else if(action==='clear-contact-filters'){S.contactsDept='';S.contactsMun='';S.contactsCat='';S.contactsPage=1;await loadContacts();render();}
+
+  // Relaciones
+  else if(action==='toggle-add-rel'){S.showAddRelationship=!S.showAddRelationship;await renderContactDetail(S.selectedContact);}
+  else if(action==='save-rel'){
+    const relatedId=document.getElementById('rel-contact-id').value;
+    if(!relatedId){toast('Selecciona un contacto',true);return;}
+    const {error}=await sb.from('contact_relationships').insert({
+      contact_id:el.dataset.contactId,related_contact_id:relatedId,
+      relationship_type:document.getElementById('rel-type').value,
+      notes:document.getElementById('rel-notes').value.trim()||null
+    });
+    if(error){toast(error.message,true);return;}
+    S.showAddRelationship=false;toast('Relación guardada ✓');await renderContactDetail(S.selectedContact);
+  }
+  else if(action==='delete-rel'){
+    await sb.from('contact_relationships').delete().eq('id',el.dataset.relId);
+    toast('Relación eliminada');await renderContactDetail(S.selectedContact);
+  }
+
+  // Empresas CRUD
+  else if(action==='toggle-add-company'){S.showAddCompany=!S.showAddCompany;render();}
+  else if(action==='cancel-add-company'){S.showAddCompany=false;render();}
+  else if(action==='save-new-company'){
+    const name=document.getElementById('nco-name').value.trim();
+    if(!name){toast('El nombre es obligatorio',true);return;}
+    const emp=document.getElementById('nco-emp').value;
+    const {error}=await sb.from('companies').insert({name,nit:document.getElementById('nco-nit').value.trim()||null,
+      sector:document.getElementById('nco-sector').value||null,departamento:document.getElementById('nco-dept').value.trim()||null,
+      municipio:document.getElementById('nco-mun').value.trim()||null,telefono:document.getElementById('nco-tel').value.trim()||null,
+      email:document.getElementById('nco-email').value.trim()||null,sitio_web:document.getElementById('nco-web').value.trim()||null,
+      direccion:document.getElementById('nco-dir').value.trim()||null,notas:document.getElementById('nco-notas').value.trim()||null,
+      numero_empleados:emp?parseInt(emp):null});
+    if(error){toast(error.message,true);return;}
+    S.showAddCompany=false;toast('Empresa creada ✓');await loadCompanies();render();
+  }
+  else if(action==='toggle-edit-company'){
+    S.editingCompanyId=S.editingCompanyId===el.dataset.id?null:el.dataset.id;
+    await renderCompanyDetail(S.selectedCompany);
+  }
+  else if(action==='save-company-edit'){
+    const form=document.getElementById('edit-company-form');
+    const payload={};
+    form.querySelectorAll('[data-field]').forEach(inp=>{
+      const v=inp.value.trim();
+      payload[inp.dataset.field]=v===''?null:(inp.type==='number'&&v?parseInt(v):v||null);
+    });
+    if(!payload.name){toast('El nombre es obligatorio',true);return;}
+    const {error}=await sb.from('companies').update(payload).eq('id',el.dataset.id);
+    if(error){toast(error.message,true);return;}
+    S.editingCompanyId=null;toast('Empresa actualizada ✓');await loadCompanies();await renderCompanyDetail(S.selectedCompany);
+  }
+  else if(action==='delete-company'){
+    if(!confirm('¿Eliminar esta empresa? Los contactos vinculados se conservan.')) return;
+    await sb.from('company_employees').delete().eq('company_id',el.dataset.id);
+    await sb.from('contacts').update({company_id:null}).eq('company_id',el.dataset.id);
+    await sb.from('companies').delete().eq('id',el.dataset.id);
+    toast('Empresa eliminada');S.selectedCompany=null;await loadCompanies();render();
+  }
+  else if(action==='toggle-add-employee'){S.showAddEmployee=!S.showAddEmployee;await renderCompanyDetail(S.selectedCompany);}
+  else if(action==='save-employee'){
+    const name=document.getElementById('ne-name').value.trim();
+    if(!name){toast('El nombre es obligatorio',true);return;}
+    const {error}=await sb.from('company_employees').insert({company_id:el.dataset.companyId,name,
+      cargo:document.getElementById('ne-cargo').value.trim()||null,
+      telefono:document.getElementById('ne-tel').value.trim()||null,
+      email:document.getElementById('ne-email').value.trim()||null});
+    if(error){toast(error.message,true);return;}
+    S.showAddEmployee=false;toast('Empleado agregado ✓');await renderCompanyDetail(S.selectedCompany);
+  }
+  else if(action==='delete-employee'){
+    await sb.from('company_employees').delete().eq('id',el.dataset.id);
+    toast('Empleado eliminado');await renderCompanyDetail(S.selectedCompany);
+  }
+
+  // Compromisos CRUD
+  else if(action==='toggle-commitment'){
+    const newStatus=el.dataset.status==='completado'?'pendiente':'completado';
+    await sb.from('commitments').update({status:newStatus}).eq('id',el.dataset.id);
+    await loadCommitments();
+    if(S.selectedContact) await renderContactDetail(S.selectedContact);
+    else if(S.selectedMeeting) await renderMeetingDetail(S.selectedMeeting);
+    else render();
+  }
+  else if(action==='edit-commitment'){S.editingCommitmentId=el.dataset.id;render();}
+  else if(action==='toggle-add-commitment'){S.showAddCommitment=!S.showAddCommitment;if(S.showAddCommitment&&!S.contacts.length)await loadContacts();render();}
+  else if(action==='cancel-add-commitment'){S.showAddCommitment=false;render();}
+  else if(action==='save-new-commitment'){
+    const text=document.getElementById('ncm-text').value.trim();
+    if(!text){toast('La descripción es obligatoria',true);return;}
+    const {error}=await sb.from('commitments').insert({text,
+      responsible:document.getElementById('ncm-resp').value.trim()||null,
+      due_date:document.getElementById('ncm-due').value||null,
+      contact_id:document.getElementById('ncm-contact').value||null,
+      status:'pendiente',source:'manual'});
+    if(error){toast(error.message,true);return;}
+    S.showAddCommitment=false;toast('Compromiso creado ✓');await loadCommitments();render();
+  }
+  else if(action==='delete-meeting'){
+    if(!confirm('¿Eliminar esta reunión? Los compromisos se conservan.')) return;
+    await sb.from('commitments').update({meeting_id:null}).eq('meeting_id',el.dataset.id);
+    await sb.from('meetings').delete().eq('id',el.dataset.id);
+    toast('Reunión eliminada');S.selectedMeeting=null;await loadMeetings();render();
+  }
+
+  // Calendario
+  else if(action==='cal-prev'){
+    let {calYear:y,calMonth:m2}=S;m2--;if(m2<0){m2=11;y--;}
+    S.calYear=y;S.calMonth=m2;await loadCalendar(y,m2);render();
+  }
+  else if(action==='cal-next'){
+    let {calYear:y,calMonth:m2}=S;m2++;if(m2>11){m2=0;y++;}
+    S.calYear=y;S.calMonth=m2;await loadCalendar(y,m2);render();
+  }
+
+  // Paginación
+  else if(action==='contacts-prev'){S.contactsPage--;await loadContacts();render();}
+  else if(action==='contacts-next'){S.contactsPage++;await loadContacts();render();}
+  else if(action==='companies-prev'){S.companiesPage--;await loadCompanies();render();}
+  else if(action==='companies-next'){S.companiesPage++;await loadCompanies();render();}
+  else if(action==='commitments-prev'){S.commitmentsPage--;await loadCommitments();render();}
+  else if(action==='commitments-next'){S.commitmentsPage++;await loadCommitments();render();}
+
+  // Exportación
+  else if(action==='export-contacts-xlsx'){
+    const {data}=await sb.from('contacts').select('*,company:companies(name)');
+    const res=await fetch(RENDER_URL+'/export/contacts.xlsx',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({data:(data||[]).map(c=>({...c,company_name:c.company?.name||null}))})});
+    const blob=await res.blob();const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download='contactos.xlsx';a.click();URL.revokeObjectURL(url);
+  }
+  else if(action==='export-contacts-pdf'){
+    const {data}=await sb.from('contacts').select('*,company:companies(name)');
+    const res=await fetch(RENDER_URL+'/export/contacts.pdf',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({data:(data||[]).map(c=>({...c,company_name:c.company?.name||null}))})});
+    const blob=await res.blob();const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download='contactos.pdf';a.click();URL.revokeObjectURL(url);
+  }
+  else if(action==='export-commitments-xlsx'){
+    const {data}=await sb.from('commitments').select('*,contact:contacts(name)');
+    const res=await fetch(RENDER_URL+'/export/commitments.xlsx',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({data:(data||[]).map(c=>({...c,contact_name:c.contact?.name||null}))})});
+    const blob=await res.blob();const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download='compromisos.xlsx';a.click();URL.revokeObjectURL(url);
+  }
+  else if(action==='export-commitments-pdf'){
+    const {data}=await sb.from('commitments').select('*,contact:contacts(name)');
+    const res=await fetch(RENDER_URL+'/export/commitments.pdf',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({data:(data||[]).map(c=>({...c,contact_name:c.contact?.name||null}))})});
+    const blob=await res.blob();const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download='compromisos.pdf';a.click();URL.revokeObjectURL(url);
+  }
+  else if(action==='export-meetings-xlsx'){
+    const {data}=await sb.from('meetings').select('*,contact:contacts(name)');
+    const res=await fetch(RENDER_URL+'/export/meetings.xlsx',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({data:(data||[]).map(m=>({...m,contact_name:m.contact?.name||null,commitments_count:0}))})});
+    const blob=await res.blob();const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download='reuniones.xlsx';a.click();URL.revokeObjectURL(url);
+  }
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════════════════════════════════════════
+function renderLogin(err=''){
+  document.body.innerHTML=`
+    <div class="login-screen">
+      <div class="login-box">
+        <h2>LORANNYS LUCAS OS</h2>
+        <p>Sistema de inteligencia política colombiana</p>
+        <div class="login-field"><label>Email</label><input type="email" id="login-email" placeholder="tu@email.com" autofocus /></div>
+        <div class="login-field"><label>Contraseña</label><input type="password" id="login-password" placeholder="••••••••" /></div>
+        <div class="login-error">${err}</div>
+        <button class="btn-primary w-full" id="login-btn" style="justify-content:center;margin-top:4px;">Entrar al despacho</button>
+      </div>
+    </div>
+    <div id="toast"></div>`;
+  const submit=async()=>{
+    const email=document.getElementById('login-email').value;
+    const password=document.getElementById('login-password').value;
+    const {data,error}=await sb.auth.signInWithPassword({email,password});
+    if(error){renderLogin(error.message);return;}
+    S.user=data.user;
+    initApp();
+  };
+  document.getElementById('login-btn').addEventListener('click',submit);
+  document.getElementById('login-password').addEventListener('keydown',e=>{if(e.key==='Enter')submit();});
+}
+
+function renderShell(){
+  document.body.innerHTML=`
+    <div id="app">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-name">LORANNYS LUCAS OS</div>
+          <div class="brand-sub">Inteligencia política colombiana</div>
+        </div>
+        <nav class="nav" id="nav"></nav>
+        <div class="sidebar-footer">
+          <button class="nav-item" id="logout-btn" style="font-size:12px;color:rgba(255,255,255,.4);">
+            ${icon('x',14,'currentColor')} Cerrar sesión
+          </button>
+          <div id="push-btn-container"></div>
+        </div>
+      </aside>
+      <main id="main-content" style="flex:1;overflow-y:auto;padding:28px;"></main>
+    </div>
+    <div id="toast"></div>`;
+  document.getElementById('logout-btn').addEventListener('click',async()=>{
+    await sb.auth.signOut(); renderLogin();
+  });
+}
+
+// ── Notificaciones push del SO ────────────────────────────────────────────────
+const PUSH = (() => {
+  const seen = new Set();
+  let _interval = null;
+  async function _check(){
+    if(!S.user||Notification.permission!=='granted') return;
+    const {data}=await sb.from('commitments').select('*,contact:contacts(name)').neq('status','completado').not('due_date','is',null);
+    const alerts=(data||[]).filter(c=>{const r=calcRisk(c);return r.overdue||r.level==='medio';});
+    const overdue=alerts.filter(c=>calcRisk(c).overdue);
+    const soon=alerts.filter(c=>!calcRisk(c).overdue);
+    if(overdue.length){
+      const tag='ov-'+overdue.map(x=>x.id).sort().join('').slice(0,40);
+      if(!seen.has(tag)){seen.add(tag);new Notification(`🔴 ${overdue.length} compromiso(s) vencido(s) — LORANNYS`,{body:overdue.slice(0,3).map(x=>x.text.slice(0,60)).join('\n'),tag:'lorannys-ov'});}
+    }
+    if(soon.length){
+      const tag='so-'+soon.map(x=>x.id).sort().join('').slice(0,40);
+      if(!seen.has(tag)){seen.add(tag);new Notification(`⚠️ ${soon.length} compromiso(s) vencen pronto — LORANNYS`,{body:soon.slice(0,3).map(x=>x.text.slice(0,60)).join('\n'),tag:'lorannys-so'});}
+    }
+  }
+  return {
+    async init(){
+      if(!('Notification' in window)) return false;
+      if(Notification.permission==='denied') return false;
+      const r=Notification.permission==='granted'||await Notification.requestPermission()==='granted';
+      if(r){await _check();if(!_interval)_interval=setInterval(_check,5*60*1000);}
+      return r;
+    },
+    forceCheck:_check
+  };
+})();
+
+// ══════════════════════════════════════════════════════════════════════════════
+// ARRANQUE
+// ══════════════════════════════════════════════════════════════════════════════
+async function initApp(){
+  // Detectar rol del usuario antes de mostrar cualquier cosa
+  const { data: roleData } = await sb.from('user_roles')
+    .select('role,nombre').eq('user_id', S.user.id).single();
+  S.userRole = roleData?.role || 'owner';
+
+  if (S.userRole === 'agenda_viewer') {
+    // ── Modo Solo-Agenda ──────────────────────────────────────────────────────
+    renderShellAgendaViewer(roleData?.nombre || S.user.email);
+    if(!S.contacts.length) await loadContacts();
+    const hoy = new Date().toISOString().slice(0,10);
+    S.agendaFecha = hoy;
+    S.agendaMes.year = new Date().getFullYear();
+    S.agendaMes.month = new Date().getMonth();
+    await loadAgendaDia(hoy);
+    await loadAgendaMes();
+    document.getElementById('main-content').innerHTML = await renderAgendaDia();
+    return;
+  }
+
+  // ── Modo Completo (owner) ─────────────────────────────────────────────────
+  renderShell();
+  await Promise.all([loadContacts(),loadCompanies(),loadCommitments(),loadContactFilters()]);
+  await sb.from('contacts').select('*',{count:'exact',head:true}).then(({count})=>S.contactsTotal=count);
+  render();
+  PUSH.init().then(ok=>{
+    const container=document.getElementById('push-btn-container');
+    if(!container) return;
+    const btn=document.createElement('button');
+    btn.className='nav-item';btn.style.fontSize='12px';btn.style.color='rgba(255,255,255,.4)';
+    btn.innerHTML=ok?`<span style="width:8px;height:8px;border-radius:50%;background:#4ade80;flex-shrink:0;"></span>Alertas del SO activas`
+      :`${icon('mail',14,'currentColor')} Activar notificaciones`;
+    btn.addEventListener('click',async()=>{const r=await PUSH.init();if(r)PUSH.forceCheck();});
+    container.appendChild(btn);
+  });
+}
+
+// Shell simplificado para usuarios solo-agenda
+function renderShellAgendaViewer(nombre){
+  document.body.innerHTML=`
+    <div id="app" style="flex-direction:column;height:100vh;">
+      <header style="background:var(--plum);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+        <div>
+          <div class="brand-name" style="font-size:15px;">LORANNYS LUCAS OS</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:1px;">Agenda · ${escHtml(nombre)}</div>
+        </div>
+        <button id="logout-btn" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.7);padding:7px 14px;border-radius:10px;cursor:pointer;font-family:inherit;font-size:12px;">
+          Cerrar sesión
+        </button>
+      </header>
+      <main id="main-content" style="flex:1;overflow-y:auto;padding:24px;"></main>
+    </div>
+    <div id="toast"></div>`;
+  document.getElementById('logout-btn').addEventListener('click', async () => {
+    await sb.auth.signOut(); renderLogin();
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// IMPORTADOR DE EXCEL
+// ══════════════════════════════════════════════════════════════════════════════
+
+// Estado del importador
+Object.assign(S, {
+  importStep: null,       // null | 'upload' | 'map' | 'progress' | 'done'
+  importRawRows: [],      // filas crudas del Excel
+  importHeaders: [],      // cabeceras del Excel
+  importMapping: {},      // { columnaExcel: campoSistema }
+  importProgress: { done: 0, total: 0, errors: [] },
+});
+
+// Campos del sistema disponibles para mapear
+const IMPORT_FIELDS = [
+  { key: '',            label: '— Ignorar esta columna —' },
+  { key: 'name',        label: 'Nombre (requerido)' },
+  { key: 'cargo',       label: 'Cargo / Puesto' },
+  { key: 'organizacion',label: 'Organización / Entidad' },
+  { key: 'departamento',label: 'Departamento' },
+  { key: 'municipio',   label: 'Municipio / Ciudad' },
+  { key: 'corregimiento',label: 'Corregimiento' },
+  { key: 'vereda',      label: 'Vereda' },
+  { key: 'categorias',  label: 'Categorías (separadas por coma)' },
+  { key: 'influence',   label: 'Influencia (número 0 a 1)' },
+  { key: 'notes',       label: 'Notas / Observaciones' },
+];
+
+// Detección automática de columnas por nombre
+function autoDetectField(header) {
+  const h = norm(String(header || ''));
+  const patterns = {
+    name:         ['nombre', 'name', 'nombres', 'nombre completo', 'full name', 'contacto', 'persona'],
+    cargo:        ['cargo', 'puesto', 'posicion', 'rol', 'role', 'titulo', 'title', 'ocupacion', 'funcion'],
+    organizacion: ['organizacion', 'empresa', 'entidad', 'institucion', 'organization', 'company', 'institucion', 'despacho'],
+    departamento: ['departamento', 'dpto', 'dept', 'departament'],
+    municipio:    ['municipio', 'ciudad', 'city', 'municipality', 'localidad', 'poblacion', 'mun'],
+    corregimiento:['corregimiento', 'corr'],
+    vereda:       ['vereda', 'vda', 'sector', 'barrio'],
+    categorias:   ['categoria', 'categorias', 'tags', 'tipo', 'clasificacion', 'grupo', 'perfil', 'segmento'],
+    influence:    ['influencia', 'influence', 'relevancia', 'importancia', 'peso', 'prioridad'],
+    notes:        ['nota', 'notes', 'observacion', 'comentario', 'descripcion', 'observaciones', 'comments'],
+  };
+  for (const [field, aliases] of Object.entries(patterns)) {
+    if (aliases.some(a => h.includes(a) || a.includes(h))) return field;
+  }
+  return '';
+}
+
+// Leer archivo Excel en el navegador con SheetJS
+function parseExcel(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const wb = XLSX.read(data, { type: 'array' });
+        const ws = wb.Sheets[wb.SheetNames[0]]; // primera hoja
+        const rows = XLSX.utils.sheet_to_json(ws, {
+          defval: '',       // valor por defecto para celdas vacías
+          raw: false,       // todo como string
+        });
+        const headers = Object.keys(rows[0] || {});
+        resolve({ rows, headers });
+      } catch (err) {
+        reject(err);
+      }
+    };
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+// Convertir una fila del Excel a un objeto de contacto usando el mapeo
+function rowToContact(row, mapping) {
+  const contact = {};
+  for (const [excelCol, sysField] of Object.entries(mapping)) {
+    if (!sysField) continue;
+    const raw = String(row[excelCol] || '').trim();
+    if (!raw) continue;
+    if (sysField === 'influence') {
+      const num = parseFloat(raw.replace(',', '.'));
+      if (!isNaN(num)) contact.influence = Math.min(1, Math.max(0, num));
+    } else {
+      // Si el campo ya tiene valor (caso de múltiples columnas mapeadas al mismo campo), concatena
+      contact[sysField] = contact[sysField] ? contact[sysField] + ', ' + raw : raw;
+    }
+  }
+  return contact;
+}
+
+// ── Render del importador ─────────────────────────────────────────────────────
+function renderImport() {
+  const step = S.importStep;
+
+  if (!step || step === 'upload') return renderImportUpload();
+  if (step === 'map') return renderImportMap();
+  if (step === 'progress') return renderImportProgress();
+  if (step === 'done') return renderImportDone();
+  return '';
+}
+
+function renderImportUpload() {
+  return `
+    <button class="back-btn" data-action="cancel-import">${icon('arrowLeft',15)} Volver a contactos</button>
+    <h1 class="page-title">Importar contactos desde Excel</h1>
+    <p class="page-subtitle">Compatible con .xlsx y .xls — la primera fila debe ser el encabezado de columnas.</p>
+
+    <div class="card p-5" style="max-width:580px;">
+      <div id="drop-zone" style="border:2px dashed var(--gray-200);border-radius:16px;padding:48px 24px;text-align:center;cursor:pointer;transition:all .2s;background:var(--gray-50);"
+           onclick="document.getElementById('excel-file-input').click()"
+           ondragover="event.preventDefault();this.style.borderColor='var(--intelligence-violet)';this.style.background='#f5f3ff';"
+           ondragleave="this.style.borderColor='var(--gray-200)';this.style.background='var(--gray-50)';"
+           ondrop="handleExcelDrop(event)">
+        <div style="font-size:40px;margin-bottom:12px;">📊</div>
+        <p class="font-semibold text-gray-700" style="margin:0 0 6px 0;">Arrastra tu archivo Excel aquí</p>
+        <p class="text-sm text-gray-400">o haz clic para seleccionarlo</p>
+        <p class="text-xs text-gray-400" style="margin-top:12px;">Soporta .xlsx y .xls · La primera fila debe ser el encabezado</p>
+      </div>
+      <input type="file" id="excel-file-input" accept=".xlsx,.xls" style="display:none;" />
+      <div id="import-file-error" style="color:#be123c;font-size:13px;margin-top:12px;display:none;"></div>
+    </div>
+
+    <div class="card p-5 mt-4" style="max-width:580px;background:#f5f3ff;border-color:#ddd6fe;">
+      <h3 class="font-semibold text-sm" style="margin:0 0 12px 0;color:var(--intelligence-violet);">¿Cómo preparar tu Excel?</h3>
+      <p class="text-sm text-gray-700" style="margin-bottom:8px;">La primera fila debe tener los nombres de las columnas. Por ejemplo:</p>
+      <div style="background:#fff;border-radius:10px;padding:12px;overflow-x:auto;">
+        <table style="font-size:12px;border-collapse:collapse;width:100%;">
+          <tr style="background:var(--plum);color:#fff;">
+            ${['NOMBRE','CARGO','ORGANIZACIÓN','DEPARTAMENTO','MUNICIPIO','CATEGORÍA'].map(h=>`<th style="padding:6px 10px;text-align:left;">${h}</th>`).join('')}
+          </tr>
+          <tr>
+            ${['Carlos Martínez','Secretario de Obras','Gobernación del Tolima','Tolima','Ibagué','Funcionario público'].map(v=>`<td style="padding:6px 10px;border-bottom:1px solid #f0f0f0;">${v}</td>`).join('')}
+          </tr>
+          <tr style="background:#fafafa;">
+            ${['Andrea Gómez','Concejal','Concejo de Soledad','Atlántico','Soledad','Concejal, Líder político'].map(v=>`<td style="padding:6px 10px;">${v}</td>`).join('')}
+          </tr>
+        </table>
+      </div>
+      <p class="text-xs text-gray-500" style="margin-top:8px;">No importa el nombre exacto de las columnas — el sistema las detecta automáticamente y te deja ajustar el mapeo.</p>
+    </div>`;
+}
+
+function renderImportMap() {
+  const headers = S.importHeaders;
+  const rows = S.importRawRows;
+  const preview = rows.slice(0, 4);
+  const mapping = S.importMapping;
+
+  const hasName = Object.values(mapping).includes('name');
+
+  return `
+    <button class="back-btn" data-action="import-back-to-upload">${icon('arrowLeft',15)} Cambiar archivo</button>
+    <h1 class="page-title">Mapear columnas</h1>
+    <p class="page-subtitle">${rows.length.toLocaleString('es-CO')} filas detectadas · Ajusta a qué campo corresponde cada columna de tu Excel.</p>
+
+    <div class="card p-5 mb-4">
+      <h3 class="font-semibold text-sm" style="margin:0 0 16px 0;">¿Qué significa cada columna?</h3>
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;font-size:13px;">
+          <thead>
+            <tr style="background:var(--gray-50);border-bottom:2px solid var(--gray-100);">
+              <th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:var(--gray-500);text-transform:uppercase;">Columna en tu Excel</th>
+              <th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:var(--gray-500);text-transform:uppercase;">Ejemplo</th>
+              <th style="padding:10px 12px;text-align:left;font-size:11px;font-weight:700;color:var(--gray-500);text-transform:uppercase;">Campo en el sistema</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${headers.map(h => {
+              const example = preview.map(r => r[h]).filter(Boolean)[0] || '—';
+              return `<tr style="border-bottom:1px solid var(--gray-50);">
+                <td style="padding:10px 12px;font-weight:600;color:var(--gray-800);">${escHtml(h)}</td>
+                <td style="padding:10px 12px;color:var(--gray-500);font-size:12px;">${escHtml(String(example).slice(0,40))}</td>
+                <td style="padding:10px 12px;">
+                  <select class="input-sm" style="font-size:12px;" data-action="set-mapping" data-col="${escHtml(h)}">
+                    ${IMPORT_FIELDS.map(f => `<option value="${f.key}" ${mapping[h]===f.key?'selected':''}>${f.label}</option>`).join('')}
+                  </select>
+                </td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card p-5 mb-4">
+      <h3 class="font-semibold text-sm" style="margin:0 0 12px 0;">Vista previa (primeras 4 filas)</h3>
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;font-size:12px;">
+          <thead><tr style="background:var(--gray-50);">
+            ${Object.entries(mapping).filter(([,v])=>v).map(([col,field])=>`
+              <th style="padding:8px 10px;text-align:left;font-size:11px;color:var(--gray-500);">${IMPORT_FIELDS.find(f=>f.key===field)?.label||field}</th>`).join('')}
+          </tr></thead>
+          <tbody>
+            ${preview.map((row,i)=>`<tr style="${i%2?'background:var(--gray-50)':''}">
+              ${Object.entries(mapping).filter(([,v])=>v).map(([col])=>`<td style="padding:8px 10px;color:var(--gray-700);">${escHtml(String(row[col]||'').slice(0,40))}</td>`).join('')}
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    ${!hasName ? `<div class="alert-critical mb-4"><div><p class="font-semibold text-sm" style="color:#be123c;margin:0;">Falta mapear el campo Nombre</p><p class="text-xs" style="color:#be123c;margin:2px 0 0 0;">Es el único campo obligatorio — selecciona qué columna contiene el nombre del contacto.</p></div></div>` : ''}
+
+    <button class="btn-primary" data-action="start-import" ${!hasName?'disabled style="opacity:.5;cursor:not-allowed;"':''}>
+      ${icon('checklist',16,'#fff')} Importar ${rows.length.toLocaleString('es-CO')} contactos →
+    </button>`;
+}
+
+function renderImportProgress() {
+  const { done, total, errors } = S.importProgress;
+  const pct = total > 0 ? Math.round(done / total * 100) : 0;
+  return `
+    <h1 class="page-title">Importando contactos…</h1>
+    <p class="page-subtitle">No cierres esta ventana hasta que termine.</p>
+    <div class="card p-5" style="max-width:480px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <span class="text-sm font-semibold text-gray-700">${done.toLocaleString('es-CO')} / ${total.toLocaleString('es-CO')} contactos</span>
+        <span class="text-sm font-bold text-violet">${pct}%</span>
+      </div>
+      <div style="background:var(--gray-100);border-radius:999px;height:12px;overflow:hidden;">
+        <div style="height:100%;border-radius:999px;background:var(--brand-gradient);width:${pct}%;transition:width .3s;"></div>
+      </div>
+      ${errors.length > 0 ? `<p class="text-xs text-gray-400" style="margin-top:10px;">⚠ ${errors.length} fila(s) con errores omitidas</p>` : ''}
+    </div>`;
+}
+
+function renderImportDone() {
+  const { done, total, errors } = S.importProgress;
+  return `
+    <div class="card p-5" style="max-width:480px;text-align:center;">
+      <div style="font-size:52px;margin-bottom:16px;">✅</div>
+      <h2 class="page-title" style="margin-bottom:8px;">¡Importación completada!</h2>
+      <p class="text-sm text-gray-500" style="margin-bottom:20px;">
+        <strong style="color:var(--intelligence-violet);font-size:18px;">${done.toLocaleString('es-CO')}</strong> contactos importados exitosamente.
+        ${errors.length > 0 ? `<br><span style="color:#b45309;">⚠ ${errors.length} filas omitidas por error (nombre vacío).</span>` : ''}
+      </p>
+      <button class="btn-primary" data-action="finish-import" style="margin:0 auto;">
+        Ver contactos →
+      </button>
+      ${errors.length > 0 ? `
+      <details style="margin-top:16px;text-align:left;">
+        <summary class="text-xs text-gray-400" style="cursor:pointer;">Ver filas con error (${errors.length})</summary>
+        <div style="margin-top:8px;background:var(--gray-50);border-radius:10px;padding:10px;max-height:160px;overflow-y:auto;">
+          ${errors.map((e,i)=>`<p class="text-xs text-gray-500" style="margin:2px 0;">Fila ${e.row}: ${escHtml(e.reason)}</p>`).join('')}
+        </div>
+      </details>` : ''}
+    </div>`;
+}
+
+// ── Lógica de importación ─────────────────────────────────────────────────────
+async function processExcelFile(file) {
+  const errEl = document.getElementById('import-file-error');
+  if (!file) return;
+  if (!file.name.match(/\.(xlsx|xls)$/i)) {
+    if (errEl) { errEl.textContent = 'Solo se aceptan archivos .xlsx o .xls'; errEl.style.display = 'block'; }
+    return;
+  }
+  try {
+    document.getElementById('drop-zone').innerHTML = '<div style="font-size:32px;">⏳</div><p class="text-sm text-gray-500 mt-3">Leyendo archivo…</p>';
+    const { rows, headers } = await parseExcel(file);
+    if (!rows.length) { toast('El archivo está vacío o no tiene datos', true); return; }
+    S.importRawRows = rows;
+    S.importHeaders = headers;
+    // Auto-detectar mapeo
+    S.importMapping = {};
+    headers.forEach(h => { S.importMapping[h] = autoDetectField(h); });
+    S.importStep = 'map';
+    render();
+  } catch(err) {
+    toast('Error al leer el archivo: ' + err.message, true);
+    S.importStep = 'upload';
+    render();
+  }
+}
+
+async function runImport() {
+  const rows = S.importRawRows;
+  const mapping = S.importMapping;
+  const BATCH = 100;
+  S.importStep = 'progress';
+  S.importProgress = { done: 0, total: rows.length, errors: [] };
+  render();
+
+  const contacts = [];
+  rows.forEach((row, idx) => {
+    const contact = rowToContact(row, mapping);
+    if (!contact.name || !contact.name.trim()) {
+      S.importProgress.errors.push({ row: idx + 2, reason: 'Nombre vacío' });
+      return;
+    }
+    contacts.push(contact);
+  });
+
+  S.importProgress.total = contacts.length;
+
+  for (let i = 0; i < contacts.length; i += BATCH) {
+    const batch = contacts.slice(i, i + BATCH);
+    const { error } = await sb.from('contacts').insert(batch);
+    if (error) {
+      // Si falla el lote completo, intentar uno por uno
+      for (const c of batch) {
+        const { error: e2 } = await sb.from('contacts').insert(c);
+        if (!e2) S.importProgress.done++;
+        else S.importProgress.errors.push({ row: '?', reason: e2.message.slice(0, 60) });
+      }
+    } else {
+      S.importProgress.done += batch.length;
+    }
+    // Actualizar UI cada lote
+    const progressDiv = document.querySelector('.card .bar-fill, [style*="width:"]');
+    const pct = Math.round(S.importProgress.done / contacts.length * 100);
+    document.querySelector('[style*="width:"][style*="transition"]')?.setAttribute('style',
+      `height:100%;border-radius:999px;background:var(--brand-gradient);width:${pct}%;transition:width .3s;`);
+    // Re-render cada 500 contactos para mostrar progreso real
+    if (i % 500 === 0 && i > 0) render();
+  }
+
+  S.importStep = 'done';
+  render();
+}
+
+// ── Manejadores de eventos de importación ────────────────────────────────────
+document.addEventListener('change', e => {
+  if (e.target.id === 'excel-file-input') {
+    processExcelFile(e.target.files[0]);
+  }
+  // Cambiar mapeo de columna en tiempo real
+  if (e.target.dataset.action === 'set-mapping') {
+    S.importMapping[e.target.dataset.col] = e.target.value;
+    // Solo re-render la preview, sin rehacer toda la vista
+    const preview = document.querySelector('.card:last-child table');
+    // Re-render completo para actualizar la preview
+    document.getElementById('main-content').innerHTML = renderImport();
+  }
+});
+
+function handleExcelDrop(event) {
+  event.preventDefault();
+  const file = event.dataTransfer?.files?.[0];
+  if (file) processExcelFile(file);
+}
+
+// ── Click handler para importación ───────────────────────────────────────────
+// (se conecta al handler global existente)
+const _origClickHandler = document.onclick;
+document.addEventListener('click', async e => {
+  const el = e.target.closest('[data-action]');
+  if (!el) return;
+  const action = el.dataset.action;
+
+  if (action === 'open-import') {
+    S.view = 'import'; S.importStep = 'upload';
+    S.importRawRows = []; S.importHeaders = []; S.importMapping = {};
+    render();
+  }
+  else if (action === 'cancel-import' || action === 'import-back-to-upload') {
+    if (action === 'import-back-to-upload') {
+      S.importStep = 'upload'; render();
+    } else {
+      S.view = 'contacts'; S.selectedContact = null;
+      await loadContacts(); render();
+    }
+  }
+  else if (action === 'start-import') {
+    const hasName = Object.values(S.importMapping).includes('name');
+    if (!hasName) { toast('Debes mapear al menos la columna de Nombre', true); return; }
+    await runImport();
+  }
+  else if (action === 'finish-import') {
+    S.view = 'contacts'; S.contactsPage = 1; S.importStep = null;
+    toast('Base de datos actualizada ✓');
+    await sb.from('contacts').select('*', { count: 'exact', head: true }).then(({ count }) => S.contactsTotal = count);
+    await loadContacts(); await loadContactFilters(); render();
+  }
+}, true); // capture: true para procesar antes del handler principal
+
+// Escuchar cambios de mapping via delegación
+document.addEventListener('change', async e => {
+  if (e.target.dataset?.action === 'set-mapping') {
+    S.importMapping[e.target.dataset.col] = e.target.value;
+    // Re-render solo la preview dentro de la vista
+    if (S.importStep === 'map') {
+      document.getElementById('main-content').innerHTML = renderImport();
+    }
+  }
+}, true);
+
+// Escuchar input de archivo
+document.addEventListener('change', e => {
+  if (e.target.id === 'excel-file-input') processExcelFile(e.target.files[0]);
+}, true);
+sb.auth.onAuthStateChange((event,session)=>{
+  if(session?.user){S.user=session.user;if(document.getElementById('app'))return;initApp();}
+  else renderLogin();
+});
+
+// Verificar sesión existente al cargar
+sb.auth.getSession().then(({data:{session}})=>{
+  if(session?.user){S.user=session.user;initApp();}
+  else renderLogin();
+});
+</script>
+<!--
+  ══════════════════════════════════════════════════════════════════
+  GUÍA DE CONFIGURACIÓN — 3 pasos
+
+  1. SUPABASE
+     • Entra a supabase.com → crea un proyecto
+     • Ejecuta supabase-schema.sql en SQL Editor
+     • Copia tu Project URL y anon/public key
+     • Pégalos en SUPABASE_URL y SUPABASE_KEY arriba
+     • En Authentication → Settings → activa Email provider
+     • Crea tu usuario en Authentication → Users → Invite user
+
+  2. RENDER (Rule Engine + exportación)
+     • Sube la carpeta render-api/ a GitHub
+     • Crea un Web Service en render.com
+     • Build Command: pip install -r requirements.txt
+     • Start Command: uvicorn main:app --host 0.0.0.0 --port $PORT
+     • Copia la URL del servicio y pégala en RENDER_URL arriba
+
+  3. ABRIR
+     • Abre este HTML en cualquier navegador
+     • (Opcional) Súbelo a Vercel/Netlify para tener URL propia y HTTPS
+  ══════════════════════════════════════════════════════════════════
+-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</body>
+</html>
+
+<script>
+// ══════════════════════════════════════════════════════════════════════════════
+// MÓDULO AGENDA EJECUTIVA
+// ══════════════════════════════════════════════════════════════════════════════
+
+const ESTADO_AG = {
+  confirmado:   { label:'Confirmado',     css:'estado-confirmado' },
+  pendiente:    { label:'Pendiente',      css:'estado-pendiente' },
+  por_confirmar:{ label:'Por confirmar',  css:'estado-por_confirmar' },
+  cancelado:    { label:'Cancelado',      css:'estado-cancelado' },
+  realizado:    { label:'Realizado',      css:'estado-realizado' },
+};
+
+function fechaLarga(iso){
+  if(!iso) return '';
+  const [y,m,d] = iso.split('-');
+  const dt = new Date(y, m-1, d);
+  return dt.toLocaleDateString('es-CO',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).toUpperCase();
+}
+
+function isoHoy(){ return new Date().toISOString().slice(0,10); }
+
+// ── Carga de datos ────────────────────────────────────────────────────────────
+async function loadAgendaDia(fecha){
+  const [{ data: eventos }, { data: objetivos }] = await Promise.all([
+    sb.from('agenda_eventos').select('*,contact:contacts(id,name)').eq('fecha',fecha).order('hora'),
+    sb.from('agenda_objetivos').select('*').eq('fecha',fecha).order('orden'),
+  ]);
+  S.agendaFecha = fecha;
+  S.agendaEventos = eventos || [];
+  S.agendaObjetivos = objetivos || [];
+}
+
+async function loadAgendaMes(){
+  const { year, month } = S.agendaMes;
+  const inicio = `${year}-${String(month+1).padStart(2,'0')}-01`;
+  const fin = new Date(year, month+1, 0).toISOString().slice(0,10);
+  const { data } = await sb.from('agenda_eventos').select('fecha').gte('fecha',inicio).lte('fecha',fin);
+  const dias = {};
+  (data||[]).forEach(e=>{ dias[e.fecha] = (dias[e.fecha]||0)+1; });
+  S.agendaMes.dias = dias;
+}
+
+// ── Vista principal — MES + DÍA ───────────────────────────────────────────────
+async function renderAgendaDia(){
+  const fecha = S.agendaFecha;
+  const eventos = S.agendaEventos;
+  const objetivos = S.agendaObjetivos;
+  const hoy = isoHoy();
+  const { year, month, dias } = S.agendaMes;
+  const monthName = new Date(year,month,1).toLocaleDateString('es-CO',{month:'long',year:'numeric'});
+  const firstDay = new Date(year,month,1).getDay();
+  const daysInMonth = new Date(year,month+1,0).getDate();
+
+  // Calendado mes (mini)
+  let celdas = '';
+  for(let i=0;i<firstDay;i++) celdas+=`<div></div>`;
+  for(let d=1;d<=daysInMonth;d++){
+    const ds=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const cnt=dias[ds]||0;
+    const isHoy=ds===hoy, isSel=ds===fecha;
+    celdas+=`<div class="mes-dia${isHoy?' hoy':''}${cnt?' con-eventos':''}" data-action="agenda-goto-dia" data-fecha="${ds}"
+      style="${isSel?'border-color:var(--rose);background:#fdf4ff;border-width:2px;':''}">
+      <div class="mes-dia-num" style="${isHoy?'color:var(--intelligence-violet);':''}">${d}</div>
+      ${cnt?`<div class="mes-dia-count">${cnt} ev.</div>`:''}
+    </div>`;
+  }
+
+  // Tabla de eventos
+  const tablaEventos = eventos.length === 0
+    ? `<div style="text-align:center;padding:40px;color:var(--gray-400);">
+        <div style="font-size:32px;margin-bottom:8px;">📅</div>
+        <p class="text-sm">Sin eventos para este día.</p>
+        <button class="btn-primary mt-3" data-action="toggle-add-evento" style="margin:12px auto 0;">+ Agregar primer evento</button>
+       </div>`
+    : `<div style="overflow-x:auto;">
+        <table class="timeline-table">
+          <thead><tr>
+            <th style="width:90px;">Hora</th>
+            <th>Compromiso</th>
+            <th>Lugar</th>
+            <th>Responsable(s)</th>
+            <th>Estado</th>
+            <th style="width:60px;"></th>
+          </tr></thead>
+          <tbody>
+            ${eventos.map(e=>`<tr>
+              <td class="timeline-hora">${escHtml(e.hora)}${e.hora_fin?'<br><span style="font-size:11px;font-weight:400;color:var(--gray-400);">'+escHtml(e.hora_fin)+'</span>':''}</td>
+              <td>
+                <div class="timeline-compromiso">${escHtml(e.compromiso)}</div>
+                ${e.contact?`<div style="font-size:11px;color:var(--intelligence-violet);margin-top:2px;">👤 ${escHtml(e.contact.name)}</div>`:''}
+                ${e.notas?`<div style="font-size:11px;color:var(--gray-400);margin-top:2px;">${escHtml(e.notas)}</div>`:''}
+              </td>
+              <td><div class="timeline-lugar">${escHtml(e.lugar||'—')}</div></td>
+              <td><div style="font-size:12px;color:var(--gray-700);">${escHtml(e.responsables||'—')}</div></td>
+              <td><span class="estado-chip-ag ${ESTADO_AG[e.estado]?.css||''}">${ESTADO_AG[e.estado]?.label||e.estado}</span></td>
+              <td class="flex gap-1">
+                <button class="icon-btn" data-action="edit-evento" data-id="${e.id}" title="Editar">${icon('edit',14)}</button>
+                <button class="icon-btn" data-action="delete-evento" data-id="${e.id}" title="Eliminar">${icon('x',14)}</button>
+              </td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+
+  return `
+    <div class="flex items-center gap-3 mb-4" style="flex-wrap:wrap;">
+      <h1 class="page-title" style="margin:0;flex:1;">Agenda Ejecutiva</h1>
+      <button class="export-btn" data-action="export-agenda-pdf" data-fecha="${fecha}">${icon('download',13)} Exportar PDF</button>
+    </div>
+
+    <div class="grid" style="grid-template-columns:280px 1fr;gap:20px;align-items:start;">
+
+      <!-- Mini calendario mes -->
+      <div class="card p-5" style="position:sticky;top:24px;">
+        <div class="flex items-center justify-between mb-3">
+          <button class="agenda-nav-btn" style="background:var(--gray-50);border:1px solid var(--gray-200);color:var(--gray-700);" data-action="agenda-mes-prev">←</button>
+          <span class="text-sm font-semibold" style="text-transform:capitalize;">${monthName}</span>
+          <button class="agenda-nav-btn" style="background:var(--gray-50);border:1px solid var(--gray-200);color:var(--gray-700);" data-action="agenda-mes-next">→</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px;">
+          ${['D','L','M','M','J','V','S'].map(d=>`<div style="text-align:center;font-size:10px;font-weight:700;color:var(--gray-400);padding:2px;">${d}</div>`).join('')}
+        </div>
+        <div class="mes-grid">${celdas}</div>
+        <div class="flex gap-2 mt-3">
+          <button class="btn-secondary w-full" style="font-size:12px;justify-content:center;" data-action="agenda-goto-dia" data-fecha="${hoy}">Hoy</button>
+        </div>
+      </div>
+
+      <!-- Vista del día -->
+      <div>
+        <div class="agenda-header">
+          <div class="agenda-fecha-nav">
+            <button class="agenda-nav-btn" data-action="agenda-dia-prev">← Día anterior</button>
+            <h2>${fechaLarga(fecha)}</h2>
+            <button class="agenda-nav-btn" data-action="agenda-dia-next">Día siguiente →</button>
+          </div>
+
+          <!-- Objetivos del día -->
+          <div class="agenda-obj">
+            <div class="flex items-center justify-between mb-2">
+              <span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;opacity:.8;">Objetivos del día</span>
+              <button style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:3px 10px;border-radius:6px;cursor:pointer;font-size:11px;font-family:inherit;" data-action="toggle-add-objetivo">+ Agregar</button>
+            </div>
+            ${S.showAddObjetivo?`
+            <div style="display:flex;gap:8px;margin-bottom:8px;">
+              <input class="input-sm" id="new-objetivo-input" placeholder="Escribir objetivo del día…" style="flex:1;background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3);color:#fff;" />
+              <button style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);color:#fff;padding:8px 14px;border-radius:10px;cursor:pointer;font-family:inherit;font-size:13px;" data-action="save-objetivo">Guardar</button>
+            </div>`:''}
+            ${objetivos.length===0 && !S.showAddObjetivo
+              ? `<p style="font-size:12px;opacity:.6;margin:0;">Sin objetivos definidos para este día.</p>`
+              : objetivos.map(o=>`
+                <div class="agenda-obj-item">
+                  <span style="flex:1;">${escHtml(o.texto)}</span>
+                  <button style="background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;padding:0;font-size:12px;" data-action="delete-objetivo" data-id="${o.id}">✕</button>
+                </div>`).join('')}
+          </div>
+        </div>
+
+        <!-- Formulario agregar evento -->
+        ${S.showAddEvento || S.editingEventoId ? renderFormEvento(S.editingEventoId ? eventos.find(e=>e.id===S.editingEventoId) : null) : ''}
+
+        <!-- Botón agregar + tabla -->
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-semibold" style="margin:0;">Línea de tiempo</h3>
+          ${!S.showAddEvento&&!S.editingEventoId?`<button class="btn-secondary" data-action="toggle-add-evento">${icon('plus',14)} Agregar evento</button>`:''}
+        </div>
+        <div class="card">${tablaEventos}</div>
+      </div>
+
+    </div>`;
+}
+
+// ── Formulario evento ─────────────────────────────────────────────────────────
+function renderFormEvento(ev){
+  const isEdit = !!ev;
+  const v = ev || {};
+  return `
+    <div class="card p-5 mb-4">
+      <h3 class="font-semibold text-sm" style="margin:0 0 14px 0;">${isEdit?'Editar evento':'Nuevo evento'}</h3>
+      <div class="edit-grid">
+        <div><label>Hora inicio *</label><input class="input-sm" id="ev-hora" placeholder="Ej. 9:00 AM" value="${escHtml(v.hora||'')}" /></div>
+        <div><label>Hora fin (opcional)</label><input class="input-sm" id="ev-hora-fin" placeholder="Ej. 10:00 AM" value="${escHtml(v.hora_fin||'')}" /></div>
+        <div style="grid-column:1/-1;"><label>Compromiso / Nombre del evento *</label><input class="input-sm" id="ev-compromiso" placeholder="Ej. Reunión con Asomicrofinanzas" value="${escHtml(v.compromiso||'')}" /></div>
+        <div><label>Lugar</label><input class="input-sm" id="ev-lugar" placeholder="Ej. Restaurante La Cesta, CLL 81 con CRA 9 — o 'Reunión virtual'" value="${escHtml(v.lugar||'')}" /></div>
+        <div><label>Estado</label>
+          <select class="input-sm" id="ev-estado">
+            ${Object.entries(ESTADO_AG).map(([k,s])=>`<option value="${k}" ${(v.estado||'confirmado')===k?'selected':''}>${s.label}</option>`).join('')}
+          </select>
+        </div>
+        <div style="grid-column:1/-1;"><label>Responsable(s) — separados por coma</label><input class="input-sm" id="ev-resp" placeholder="Ej. Lorannys Lucas, Ana Blanco" value="${escHtml(v.responsables||'')}" /></div>
+        <div style="grid-column:1/-1;"><label>Contacto del CRM (opcional)</label>
+          <select class="input-sm" id="ev-contact">
+            <option value="">— Sin asociar —</option>
+            ${S.contacts.map(c=>`<option value="${c.id}" ${v.contact_id===c.id?'selected':''}>${escHtml(c.name)}</option>`).join('')}
+          </select>
+        </div>
+        <div style="grid-column:1/-1;"><label>Notas adicionales</label><input class="input-sm" id="ev-notas" placeholder="Observaciones internas" value="${escHtml(v.notas||'')}" /></div>
+      </div>
+      <div class="edit-actions">
+        <button class="btn-primary" data-action="${isEdit?'save-edit-evento':'save-new-evento'}" ${isEdit?`data-id="${ev.id}"`:''}>${isEdit?'Guardar cambios':'Agregar evento'}</button>
+        <button class="btn-secondary" data-action="cancel-form-evento">Cancelar</button>
+      </div>
+    </div>`;
+}
+
+// ── Click handler del módulo agenda ──────────────────────────────────────────
+document.addEventListener('click', async e => {
+  const el = e.target.closest('[data-action]');
+  if (!el) return;
+  const action = el.dataset.action;
+
+  if (action === 'agenda-goto-dia') {
+    S.agendaFecha = el.dataset.fecha;
+    S.showAddEvento = false; S.editingEventoId = null; S.showAddObjetivo = false;
+    if(!S.contacts.length) await loadContacts();
+    await loadAgendaDia(S.agendaFecha);
+    document.getElementById('main-content').innerHTML = await renderAgendaDia();
+  }
+
+  else if (action === 'agenda-dia-prev' || action === 'agenda-dia-next') {
+    const d = new Date(S.agendaFecha + 'T00:00:00');
+    d.setDate(d.getDate() + (action === 'agenda-dia-prev' ? -1 : 1));
+    S.agendaFecha = d.toISOString().slice(0,10);
+    S.showAddEvento = false; S.editingEventoId = null; S.showAddObjetivo = false;
+    await loadAgendaDia(S.agendaFecha);
+    await loadAgendaMes();
+    document.getElementById('main-content').innerHTML = await renderAgendaDia();
+  }
+
+  else if (action === 'agenda-mes-prev' || action === 'agenda-mes-next') {
+    let { year, month } = S.agendaMes;
+    month += action === 'agenda-mes-prev' ? -1 : 1;
+    if (month < 0) { month = 11; year--; }
+    if (month > 11) { month = 0; year++; }
+    S.agendaMes = { ...S.agendaMes, year, month };
+    await loadAgendaMes();
+    document.getElementById('main-content').innerHTML = await renderAgendaDia();
+  }
+
+  else if (action === 'toggle-add-evento') {
+    S.showAddEvento = !S.showAddEvento; S.editingEventoId = null;
+    if(!S.contacts.length) await loadContacts();
+    document.getElementById('main-content').innerHTML = await renderAgendaDia();
+  }
+
+  else if (action === 'cancel-form-evento') {
+    S.showAddEvento = false; S.editingEventoId = null;
+    document.getElementById('main-content').innerHTML = await renderAgendaDia();
+  }
+
+  else if (action === 'save-new-evento') {
+    const hora = document.getElementById('ev-hora').value.trim();
+    const compromiso = document.getElementById('ev-compromiso').value.trim();
+    if (!hora || !compromiso) { toast('Hora y compromiso son obligatorios', true); return; }
+    const { error } = await sb.from('agenda_eventos').insert({
+      fecha: S.agendaFecha, hora, hora_fin: document.getElementById('ev-hora-fin').value.trim()||null,
+      compromiso, lugar: document.getElementById('ev-lugar').value.trim()||null,
+      estado: document.getElementById('ev-estado').value,
+      responsables: document.getElementById('ev-resp').value.trim()||null,
+      contact_id: document.getElementById('ev-contact').value||null,
+      notas: document.getElementById('ev-notas').value.trim()||null,
+    });
+    if (error) { toast(error.message, true); return; }
+    S.showAddEvento = false; toast('Evento agregado ✓');
+    await loadAgendaDia(S.agendaFecha); await loadAgendaMes();
+    document.getElementById('main-content').innerHTML = await renderAgendaDia();
+  }
+
+  else if (action === 'edit-evento') {
+    S.editingEventoId = el.dataset.id; S.showAddEvento = false;
+    if(!S.contacts.length) await loadContacts();
+    document.getElementById('main-content').innerHTML = await renderAgendaDia();
+  }
+
+  else if (action === 'save-edit-evento') {
+    const hora = document.getElementById('ev-hora').value.trim();
+    const compromiso = document.getElementById('ev-compromiso').value.trim();
+    if (!hora || !compromiso) { toast('Hora y compromiso son obligatorios', true); return; }
+    const { error } = await sb.from('agenda_eventos').update({
+      hora, hora_fin: document.getElementById('ev-hora-fin').value.trim()||null,
+      compromiso, lugar: document.getElementById('ev-lugar').value.trim()||null,
+      estado: document.getElementById('ev-estado').value,
+      responsables: document.getElementById('ev-resp').value.trim()||null,
+      contact_id: document.getElementById('ev-contact').value||null,
+      notas: document.getElementById('ev-notas').value.trim()||null,
+    }).eq('id', el.dataset.id);
+    if (error) { toast(error.message, true); return; }
+    S.editingEventoId = null; toast('Evento actualizado ✓');
+    await loadAgendaDia(S.agendaFecha);
+    document.getElementById('main-content').innerHTML = await renderAgendaDia();
+  }
+
+  else if (action === 'delete-evento') {
+    if (!confirm('¿Eliminar este evento?')) return;
+    await sb.from('agenda_eventos').delete().eq('id', el.dataset.id);
+    toast('Evento eliminado');
+    await loadAgendaDia(S.agendaFecha); await loadAgendaMes();
+    document.getElementById('main-content').innerHTML = await renderAgendaDia();
+  }
+
+  else if (action === 'toggle-add-objetivo') {
+    S.showAddObjetivo = !S.showAddObjetivo;
+    document.getElementById('main-content').innerHTML = await renderAgendaDia();
+    if (S.showAddObjetivo) setTimeout(() => document.getElementById('new-objetivo-input')?.focus(), 50);
+  }
+
+  else if (action === 'save-objetivo') {
+    const texto = document.getElementById('new-objetivo-input')?.value.trim();
+    if (!texto) { toast('Escribe el objetivo', true); return; }
+    const maxOrden = Math.max(0, ...S.agendaObjetivos.map(o => o.orden));
+    const { error } = await sb.from('agenda_objetivos').insert({ fecha: S.agendaFecha, texto, orden: maxOrden + 1 });
+    if (error) { toast(error.message, true); return; }
+    S.showAddObjetivo = false; toast('Objetivo agregado ✓');
+    await loadAgendaDia(S.agendaFecha);
+    document.getElementById('main-content').innerHTML = await renderAgendaDia();
+  }
+
+  else if (action === 'delete-objetivo') {
+    await sb.from('agenda_objetivos').delete().eq('id', el.dataset.id);
+    await loadAgendaDia(S.agendaFecha);
+    document.getElementById('main-content').innerHTML = await renderAgendaDia();
+  }
+
+  else if (action === 'export-agenda-pdf') {
+    const fecha = el.dataset.fecha || S.agendaFecha;
+    // Indicador de carga — Render free tier puede tardar 30-50s si estaba dormido
+    el.disabled = true;
+    el.innerHTML = `<span style="display:inline-block;animation:spin 1s linear infinite;margin-right:6px;">⏳</span> Generando PDF…`;
+    const styleEl = document.createElement('style');
+    styleEl.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
+    document.head.appendChild(styleEl);
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 90000); // 90s timeout
+      const res = await fetch(RENDER_URL + '/export/agenda.pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
+        body: JSON.stringify({
+          fecha,
+          fecha_larga: fechaLarga(fecha),
+          objetivos: S.agendaObjetivos.map(o => o.texto),
+          eventos: S.agendaEventos.map(e => ({
+            hora: e.hora, hora_fin: e.hora_fin,
+            compromiso: e.compromiso, lugar: e.lugar,
+            responsables: e.responsables, estado: e.estado,
+          })),
+        }),
+      });
+      clearTimeout(timeoutId);
+      if (!res.ok) { toast('Error generando PDF — revisa que Render esté activo', true); }
+      else {
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = `agenda-${fecha}.pdf`; a.click();
+        URL.revokeObjectURL(url);
+        toast('PDF descargado ✓');
+      }
+    } catch(err) {
+      if (err.name === 'AbortError') toast('Tiempo agotado — Render tardó más de 90s. Intenta de nuevo.', true);
+      else toast('Error: ' + err.message, true);
+    } finally {
+      el.disabled = false;
+      el.innerHTML = `${icon('download',13)} Exportar PDF`;
+    }
+  }
+
+}, true);
+
+// Enter en input objetivo
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.id === 'new-objetivo-input') {
+    document.querySelector('[data-action="save-objetivo"]')?.click();
+  }
+});
+</script>
